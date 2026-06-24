@@ -1525,16 +1525,32 @@ function renderBalanceQ() {
   const saved = balanceAllPicks[balanceIdx] || {};
   const revealed = saved._revealed || false;
 
+  // Always reset button labels first
+  const q2 = balanceQuestions[balanceIdx];
+  ['hoho','sujonku'].forEach(who => {
+    const prefix = who === '호호' ? 'hoho' : 'sujonku';
+    document.getElementById(prefix+'-a-btn').textContent = q2.a;
+    document.getElementById(prefix+'-b-btn').textContent = q2.b;
+    // Reset button styles
+    ['a','b'].forEach(c => {
+      const btn = document.getElementById(prefix+'-'+c+'-btn');
+      const defaultBg = who === '호호' ? '#f5f9ff' : '#fff5f7';
+      const defaultBorder = who === '호호' ? '#ddeeff' : '#fde8ed';
+      btn.style.background = defaultBg;
+      btn.style.borderColor = defaultBorder;
+      btn.style.color = 'var(--brown1)';
+      btn.style.opacity = '1';
+    });
+  });
+
   if (revealed) {
-    // Show revealed state
     showRevealedState(saved);
   } else {
-    // Hide picks, show buttons
     document.getElementById('balance-result').style.display = 'none';
     document.getElementById('balance-reveal-btn').style.display = 'none';
-    ['hoho','sujonku'].forEach(who => {
+    ['호호','수쫑쿠'].forEach(who => {
       const prefix = who === '호호' ? 'hoho' : 'sujonku';
-      const hasPick = saved[who];
+      const hasPick = !!saved[who];
       document.getElementById(prefix+'-pick-hidden').style.display = hasPick ? 'block' : 'none';
       document.getElementById(prefix+'-pick-btns').style.display = hasPick ? 'none' : 'grid';
     });
