@@ -2242,7 +2242,9 @@ const aboutTitles = {
 function editAbout(key) {
   _aboutKey = key;
   document.getElementById('about-modal-title').textContent = aboutTitles[key] || '소개 수정';
-  // Load existing data
+  // Show basic fields only for self intro
+  const isSelf = key.endsWith('-self');
+  document.getElementById('about-basic-fields').style.display = isSelf ? 'block' : 'none';
   const { doc, getDoc } = window._firebase;
   getDoc(doc(window._db, 'about', key)).then(snap => {
     const d = snap.exists() ? snap.data() : {};
@@ -2253,7 +2255,9 @@ function editAbout(key) {
     document.getElementById('about-shoe').value = d.shoe || '';
     document.getElementById('about-blood').value = d.blood || '';
     document.getElementById('about-personality').value = d.personality || '';
+    document.getElementById('about-trait').value = d.trait || '';
     document.getElementById('about-likes').value = d.likes || '';
+    document.getElementById('about-dislikes').value = d.dislikes || '';
     document.getElementById('about-memo').value = d.memo || '';
   });
   openModal('about-edit');
@@ -2262,15 +2266,20 @@ function editAbout(key) {
 async function saveAbout() {
   if (!_aboutKey) return;
   const { doc, setDoc } = window._firebase;
+  const isSelf = _aboutKey.endsWith('-self');
   const data = {
-    name: document.getElementById('about-name').value.trim(),
-    mbti: document.getElementById('about-mbti').value.trim(),
-    birth: document.getElementById('about-birth').value.trim(),
-    height: document.getElementById('about-height').value.trim(),
-    shoe: document.getElementById('about-shoe').value.trim(),
-    blood: document.getElementById('about-blood').value.trim(),
+    ...(isSelf && {
+      name: document.getElementById('about-name').value.trim(),
+      mbti: document.getElementById('about-mbti').value.trim(),
+      birth: document.getElementById('about-birth').value.trim(),
+      height: document.getElementById('about-height').value.trim(),
+      shoe: document.getElementById('about-shoe').value.trim(),
+      blood: document.getElementById('about-blood').value.trim(),
+    }),
     personality: document.getElementById('about-personality').value.trim(),
+    trait: document.getElementById('about-trait').value.trim(),
     likes: document.getElementById('about-likes').value.trim(),
+    dislikes: document.getElementById('about-dislikes').value.trim(),
     memo: document.getElementById('about-memo').value.trim(),
   };
   await setDoc(doc(window._db, 'about', _aboutKey), data);
@@ -2282,15 +2291,20 @@ async function saveAbout() {
 function renderAbout(key, data) {
   const el = document.getElementById('about-'+key+'-view');
   if (!el) return;
-  const fields = [
+  const basicFields = [
     data.name && ['이름', data.name],
     data.birth && ['생일', data.birth],
     data.mbti && ['MBTI', data.mbti],
     data.height && ['키', data.height],
     data.shoe && ['발 사이즈', data.shoe],
     data.blood && ['혈액형', data.blood],
+  ].filter(Boolean);
+  const fields = [
+    ...basicFields,
     data.personality && ['성격', data.personality],
+    data.trait && ['특징', data.trait],
     data.likes && ['좋아하는 것', data.likes],
+    data.dislikes && ['싫어하는 것', data.dislikes],
     data.memo && ['한마디', data.memo],
   ].filter(Boolean);
 
@@ -3160,36 +3174,44 @@ window.addEventListener('firebase-ready', () => {
 <div class="modal-backdrop" id="modal-about-edit">
   <div class="modal">
     <h3 id="about-modal-title">소개 수정</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">이름</div>
-        <input type="text" id="about-name" placeholder="이름" />
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">MBTI</div>
-        <input type="text" id="about-mbti" placeholder="MBTI" />
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">생일</div>
-        <input type="text" id="about-birth" placeholder="생일" />
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">키</div>
-        <input type="text" id="about-height" placeholder="키" />
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">발 사이즈</div>
-        <input type="text" id="about-shoe" placeholder="발 사이즈" />
-      </div>
-      <div>
-        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">혈액형</div>
-        <input type="text" id="about-blood" placeholder="혈액형" />
+    <!-- 자기소개용 기본 정보 (self 타입만 표시) -->
+    <div id="about-basic-fields">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">이름</div>
+          <input type="text" id="about-name" placeholder="이름" />
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">MBTI</div>
+          <input type="text" id="about-mbti" placeholder="MBTI" />
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">생일</div>
+          <input type="text" id="about-birth" placeholder="예: 2000.01.01" />
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">키</div>
+          <input type="text" id="about-height" placeholder="예: 168cm" />
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">발 사이즈</div>
+          <input type="text" id="about-shoe" placeholder="예: 240mm" />
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">혈액형</div>
+          <input type="text" id="about-blood" placeholder="예: A형" />
+        </div>
       </div>
     </div>
-    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">성격 / 특징</div>
-    <textarea id="about-personality" rows="2" placeholder="성격이나 특징을 소개해줘요"></textarea>
+    <!-- 공통 항목 -->
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">성격</div>
+    <input type="text" id="about-personality" placeholder="예: 활발하고 애교 많음" />
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">특징</div>
+    <input type="text" id="about-trait" placeholder="예: 잠이 많음, 손이 따뜻함" />
     <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">좋아하는 것</div>
-    <input type="text" id="about-likes" placeholder="좋아하는 음식, 취미 등" />
+    <input type="text" id="about-likes" placeholder="예: 고양이, 라면, 넷플릭스" />
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">싫어하는 것</div>
+    <input type="text" id="about-dislikes" placeholder="예: 벌레, 시끄러운 곳" />
     <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">한마디</div>
     <input type="text" id="about-memo" placeholder="한마디 남기기" />
     <div class="modal-btns">
