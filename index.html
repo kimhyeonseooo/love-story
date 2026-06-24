@@ -284,6 +284,17 @@
     .hoho-result-emoji { font-size: 26px; margin-bottom: 3px; }
     .hoho-result-text { font-size: 22px; font-weight: 600; color: var(--brown1); font-family: 'Nunito', 'Noto Sans KR', sans-serif; }
     @keyframes popIn { from { transform: scale(0.8); opacity:0; } to { transform: scale(1); opacity:1; } }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1) rotate(0deg); opacity:1; }
+      100% { transform: translateY(-120vh) scale(0.5) rotate(720deg); opacity:0; }
+    }
+    .heart-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-size: 24px;
+      animation: floatUp 1.8s ease-out forwards;
+    }
 
     /* ── Question ── */
     .q-answer { display:flex; gap:6px; align-items:flex-start; margin-bottom:6px; }
@@ -743,24 +754,40 @@
           <!-- 호호 선택 -->
           <div style="margin-bottom:10px;">
             <div style="font-size:10px;font-weight:600;color:#7aaad4;margin-bottom:6px;">호호의 선택</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div id="hoho-pick-hidden" style="display:none;background:#ddeeff;border-radius:10px;padding:10px;font-size:12px;color:#3a6ea8;font-weight:600;">✅ 선택 완료!</div>
+            <div id="hoho-pick-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <button id="hoho-a-btn" onclick="pickBalance('호호','A')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #ddeeff;background:#f5f9ff;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
               <button id="hoho-b-btn" onclick="pickBalance('호호','B')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #ddeeff;background:#f5f9ff;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
             </div>
           </div>
 
           <!-- 수쫑쿠 선택 -->
-          <div>
+          <div style="margin-bottom:14px;">
             <div style="font-size:10px;font-weight:600;color:#e8849a;margin-bottom:6px;">수쫑쿠의 선택</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div id="sujonku-pick-hidden" style="display:none;background:#fde8ed;border-radius:10px;padding:10px;font-size:12px;color:#c04060;font-weight:600;">✅ 선택 완료!</div>
+            <div id="sujonku-pick-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <button id="sujonku-a-btn" onclick="pickBalance('수쫑쿠','A')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #fde8ed;background:#fff5f7;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
               <button id="sujonku-b-btn" onclick="pickBalance('수쫑쿠','B')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #fde8ed;background:#fff5f7;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
             </div>
           </div>
+
+          <!-- 정답 공개 버튼 -->
+          <button id="balance-reveal-btn" onclick="revealBalance()" style="display:none;width:100%;background:linear-gradient(135deg,var(--accent),#f090a8);border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;color:white;cursor:pointer;font-family:inherit;">🎉 정답 공개!</button>
         </div>
 
         <!-- 결과 -->
         <div id="balance-result" style="display:none;text-align:center;background:var(--cream4);border-radius:12px;padding:12px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:center;gap:12px;margin-bottom:8px;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:#7aaad4;margin-bottom:2px;">호호</div>
+              <div id="balance-hoho-reveal" style="font-size:13px;font-weight:700;color:#3a6ea8;background:#ddeeff;border-radius:8px;padding:4px 10px;"></div>
+            </div>
+            <div style="font-size:20px;line-height:2;">vs</div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:#e8849a;margin-bottom:2px;">수쫑쿠</div>
+              <div id="balance-sujonku-reveal" style="font-size:13px;font-weight:700;color:#c04060;background:#fde8ed;border-radius:8px;padding:4px 10px;"></div>
+            </div>
+          </div>
           <div id="balance-result-emoji" style="font-size:24px;margin-bottom:4px;"></div>
           <div id="balance-result-text" style="font-size:13px;font-weight:600;color:var(--brown1);"></div>
         </div>
@@ -1490,31 +1517,32 @@ function renderBalanceQ() {
   document.getElementById('balance-num').textContent = (balanceIdx+1) + ' / ' + balanceQuestions.length;
   document.getElementById('balance-q').textContent = q.q;
 
-  // Set button labels for both rows
   ['hoho','sujonku'].forEach(who => {
     document.getElementById(who+'-a-btn').textContent = q.a;
     document.getElementById(who+'-b-btn').textContent = q.b;
-    // Reset styles
-    ['a','b'].forEach(c => {
-      const btn = document.getElementById(who+'-'+c+'-btn');
-      btn.style.opacity = '1';
-      btn.style.fontWeight = '600';
-    });
   });
 
-  // Restore saved picks for this question
   const saved = balanceAllPicks[balanceIdx] || {};
-  highlightPick('호호', saved['호호'] || null);
-  highlightPick('수쫑쿠', saved['수쫑쿠'] || null);
+  const revealed = saved._revealed || false;
 
-  // Show result if both picked
-  if (saved['호호'] && saved['수쫑쿠']) {
-    showBalanceResult(saved['호호'], saved['수쫑쿠']);
+  if (revealed) {
+    // Show revealed state
+    showRevealedState(saved);
   } else {
+    // Hide picks, show buttons
     document.getElementById('balance-result').style.display = 'none';
+    document.getElementById('balance-reveal-btn').style.display = 'none';
+    ['hoho','sujonku'].forEach(who => {
+      const prefix = who === '호호' ? 'hoho' : 'sujonku';
+      const hasPick = saved[who];
+      document.getElementById(prefix+'-pick-hidden').style.display = hasPick ? 'block' : 'none';
+      document.getElementById(prefix+'-pick-btns').style.display = hasPick ? 'none' : 'grid';
+    });
+    if (saved['호호'] && saved['수쫑쿠']) {
+      document.getElementById('balance-reveal-btn').style.display = 'block';
+    }
   }
 
-  // Prev button
   document.getElementById('balance-prev-btn').style.opacity = balanceIdx === 0 ? '0.3' : '1';
 }
 
@@ -1542,21 +1570,52 @@ function highlightPick(who, choice) {
 
 function pickBalance(who, choice) {
   if (!balanceAllPicks[balanceIdx]) balanceAllPicks[balanceIdx] = {};
-  balanceAllPicks[balanceIdx][who] = choice;
-  highlightPick(who, choice);
-
   const picks = balanceAllPicks[balanceIdx];
+  if (picks._revealed) return; // locked after reveal
+  picks[who] = choice;
+
+  // Hide buttons, show "선택 완료"
+  const prefix = who === '호호' ? 'hoho' : 'sujonku';
+  document.getElementById(prefix+'-pick-btns').style.display = 'none';
+  document.getElementById(prefix+'-pick-hidden').style.display = 'block';
+
+  // Show reveal button if both picked
   if (picks['호호'] && picks['수쫑쿠']) {
-    setTimeout(() => showBalanceResult(picks['호호'], picks['수쫑쿠']), 200);
+    document.getElementById('balance-reveal-btn').style.display = 'block';
   }
 }
 
-function showBalanceResult(pickHoho, pickSujonku) {
-  const same = pickHoho === pickSujonku;
+function revealBalance() {
+  const picks = balanceAllPicks[balanceIdx];
+  if (!picks || !picks['호호'] || !picks['수쫑쿠']) return;
+  picks._revealed = true;
+  showRevealedState(picks);
+}
+
+function showRevealedState(picks) {
+  const q = balanceQuestions[balanceIdx];
+  ['hoho','sujonku'].forEach(who => {
+    const prefix = who === '호호' ? 'hoho' : 'sujonku';
+    document.getElementById(prefix+'-pick-hidden').style.display = 'none';
+    document.getElementById(prefix+'-pick-btns').style.display = 'none';
+  });
+  document.getElementById('balance-reveal-btn').style.display = 'none';
+
+  // Show result with actual picks
+  const hohoLabel = picks['호호'] === 'A' ? q.a : q.b;
+  const sujonkuLabel = picks['수쫑쿠'] === 'A' ? q.a : q.b;
+  document.getElementById('balance-hoho-reveal').textContent = hohoLabel;
+  document.getElementById('balance-sujonku-reveal').textContent = sujonkuLabel;
+
+  const same = picks['호호'] === picks['수쫑쿠'];
   const el = document.getElementById('balance-result');
   el.style.display = 'block';
   document.getElementById('balance-result-emoji').textContent = same ? '💕' : '🤣';
   document.getElementById('balance-result-text').textContent = same ? '같은 선택! 역시 찰떡궁합~' : '서로 다른 선택! 취향 차이 발견~';
+}
+
+function showBalanceResult(pickHoho, pickSujonku) {
+  // kept for compatibility
 }
 
 function prevBalance() {
@@ -1617,9 +1676,31 @@ function spinMission() {
 }
 
 function completeMission() {
-  toast('미션 완료! 🎉 다음 미션도 도전해봐요!');
+  showHeartAnimation();
   document.getElementById('mission-done').style.display = 'none';
-  spinMission();
+  setTimeout(() => {
+    spinMission();
+  }, 800);
+}
+
+function showHeartAnimation() {
+  const emojis = ['❤️','💕','💗','💖','✨','🎉','💝','🌸','💓','⭐'];
+  const count = 20;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'heart-particle';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (Math.random() * 100) + 'vw';
+      el.style.top = (60 + Math.random() * 30) + 'vh';
+      el.style.fontSize = (16 + Math.random() * 20) + 'px';
+      el.style.animationDuration = (1.2 + Math.random() * 1) + 's';
+      el.style.animationDelay = (Math.random() * 0.3) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }, i * 60);
+  }
+  toast('미션 완료! 🎉');
 }
 
 // ── Date Roulette ──
