@@ -20,7 +20,7 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
     const firebaseConfig = {
@@ -37,7 +37,7 @@
     const storage = getStorage(app);
     window._db = db;
     window._storage = storage;
-    window._firebase = { collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc, ref, uploadBytes, getDownloadURL };
+    window._firebase = { collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDoc, setDoc, ref, uploadBytes, getDownloadURL };
     window.dispatchEvent(new Event("firebase-ready"));
   </script>
 
