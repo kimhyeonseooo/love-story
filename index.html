@@ -439,6 +439,7 @@
         <button class="ptab" onclick="switchRecord('sulk',this)">서운핑</button>
         <button class="ptab" onclick="switchRecord('letters',this)">편지함</button>
         <button class="ptab" onclick="switchRecord('capsule',this)">타임캡슐</button>
+        <button class="ptab" onclick="switchRecord('about',this)">💑 우리</button>
       </div>
 
       <!-- 일기 -->
@@ -515,6 +516,47 @@
         <div id="capsule-list"></div>
         <button class="add-btn" onclick="openModal('capsule')"><i class="ti ti-plus"></i> 타임캡슐 만들기</button>
       </div>
+      <!-- 우리 소개 -->
+      <div id="record-about" style="display:none;">
+        <div class="sec-title">💑 우리를 기록해요</div>
+
+        <!-- 호호 자기소개 -->
+        <div class="card" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩵 호호</div>
+            <button onclick="editAbout('hoho-self')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
+          </div>
+          <div id="about-hoho-self-view"></div>
+        </div>
+
+        <!-- 수쫑쿠 자기소개 -->
+        <div class="card" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩷 수쫑쿠</div>
+            <button onclick="editAbout('sujonku-self')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
+          </div>
+          <div id="about-sujonku-self-view"></div>
+        </div>
+
+        <!-- 호호가 수쫑쿠를 소개 -->
+        <div class="card" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩵 호호가 소개하는 수쫑쿠</div>
+            <button onclick="editAbout('hoho-about-sujonku')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
+          </div>
+          <div id="about-hoho-about-sujonku-view"></div>
+        </div>
+
+        <!-- 수쫑쿠가 호호를 소개 -->
+        <div class="card" style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩷 수쫑쿠가 소개하는 호호</div>
+            <button onclick="editAbout('sujonku-about-hoho')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
+          </div>
+          <div id="about-sujonku-about-hoho-view"></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- 🗺️ 지도 -->
@@ -700,47 +742,45 @@
 
       <!-- 밸런스게임 -->
       <div id="hoho-balance" style="display:none;">
-        <div style="text-align:center;padding:4px 0 12px;">
+        <div style="text-align:center;padding:4px 0 10px;">
           <div style="font-size:13px;color:var(--brown3);">서로의 선택을 맞춰봐요! 💑</div>
         </div>
-        <div id="balance-card" style="background:var(--card);border:0.5px solid var(--cream5);border-radius:16px;padding:20px 16px;margin-bottom:12px;text-align:center;">
+
+        <!-- 질문 카드 -->
+        <div style="background:var(--card);border:0.5px solid var(--cream5);border-radius:16px;padding:18px 16px;margin-bottom:12px;text-align:center;">
           <div id="balance-num" style="font-size:11px;color:var(--brown3);margin-bottom:8px;">1 / 10</div>
           <div id="balance-q" style="font-size:15px;font-weight:600;color:var(--brown1);margin-bottom:16px;line-height:1.5;"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-            <button id="balance-a-btn" onclick="selectBalance('A')" style="padding:14px 8px;border-radius:12px;border:2px solid var(--cream5);background:var(--cream4);font-size:13px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .2s;"></button>
-            <button id="balance-b-btn" onclick="selectBalance('B')" style="padding:14px 8px;border-radius:12px;border:2px solid var(--cream5);background:var(--cream4);font-size:13px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .2s;"></button>
+
+          <!-- 호호 선택 -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:600;color:#7aaad4;margin-bottom:6px;">호호의 선택</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <button id="hoho-a-btn" onclick="pickBalance('호호','A')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #ddeeff;background:#f5f9ff;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
+              <button id="hoho-b-btn" onclick="pickBalance('호호','B')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #ddeeff;background:#f5f9ff;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
+            </div>
           </div>
-          <!-- Who selector -->
-          <div id="balance-who-select" style="display:none;background:var(--cream4);border-radius:12px;padding:10px;margin-bottom:4px;">
-            <div style="font-size:11px;color:var(--brown3);margin-bottom:8px;">누가 선택하나요?</div>
-            <div style="display:flex;gap:8px;">
-              <button onclick="confirmBalance('호호')" style="flex:1;background:#ddeeff;border:1.5px solid #7aaad4;border-radius:10px;padding:8px;font-size:12px;font-weight:600;color:#3a6ea8;cursor:pointer;font-family:inherit;">호호</button>
-              <button onclick="confirmBalance('수쫑쿠')" style="flex:1;background:#fde8ed;border:1.5px solid #e8849a;border-radius:10px;padding:8px;font-size:12px;font-weight:600;color:#c04060;cursor:pointer;font-family:inherit;">수쫑쿠</button>
+
+          <!-- 수쫑쿠 선택 -->
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#e8849a;margin-bottom:6px;">수쫑쿠의 선택</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <button id="sujonku-a-btn" onclick="pickBalance('수쫑쿠','A')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #fde8ed;background:#fff5f7;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
+              <button id="sujonku-b-btn" onclick="pickBalance('수쫑쿠','B')" style="padding:10px 6px;border-radius:10px;border:1.5px solid #fde8ed;background:#fff5f7;font-size:12px;font-weight:600;color:var(--brown1);cursor:pointer;font-family:inherit;transition:all .15s;"></button>
             </div>
           </div>
         </div>
 
-        <!-- 선택 현황 -->
-        <div id="balance-status" style="display:flex;gap:8px;margin-bottom:12px;">
-          <div style="flex:1;background:var(--cream4);border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">호호</div>
-            <div id="balance-hoho-pick" style="font-size:14px;font-weight:600;color:var(--brown1);">❓</div>
-          </div>
-          <div style="flex:1;background:var(--cream4);border-radius:12px;padding:10px;text-align:center;">
-            <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">수쫑쿠</div>
-            <div id="balance-sujonku-pick" style="font-size:14px;font-weight:600;color:var(--brown1);">❓</div>
-          </div>
-        </div>
-
         <!-- 결과 -->
-        <div id="balance-result" style="display:none;text-align:center;background:var(--cream4);border-radius:12px;padding:12px;margin-bottom:12px;">
-          <div id="balance-result-emoji" style="font-size:28px;margin-bottom:4px;"></div>
+        <div id="balance-result" style="display:none;text-align:center;background:var(--cream4);border-radius:12px;padding:12px;margin-bottom:10px;">
+          <div id="balance-result-emoji" style="font-size:24px;margin-bottom:4px;"></div>
           <div id="balance-result-text" style="font-size:13px;font-weight:600;color:var(--brown1);"></div>
         </div>
 
+        <!-- 이전/다음 버튼 -->
         <div style="display:flex;gap:8px;">
-          <button id="balance-next-btn" onclick="nextBalance()" style="display:none;flex:1;background:var(--accent);border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:inherit;">다음 질문 →</button>
-          <button onclick="resetBalance()" style="flex:1;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:12px;padding:12px;font-size:13px;color:var(--brown2);cursor:pointer;font-family:inherit;">🔄 처음부터</button>
+          <button onclick="prevBalance()" id="balance-prev-btn" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--brown2);cursor:pointer;font-family:inherit;">← 이전</button>
+          <button onclick="nextBalance()" id="balance-next-btn" style="flex:1;background:var(--accent);border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:600;color:white;cursor:pointer;font-family:inherit;">다음 →</button>
+          <button onclick="resetBalance()" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--brown2);cursor:pointer;font-family:inherit;">🔄</button>
         </div>
       </div>
 
@@ -1039,7 +1079,8 @@ function refreshHomePhotos() {
 }
 
 function switchRecord(type, btn) {
-  ['diary','worry','sulk','letters','capsule'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
+  ['diary','worry','sulk','letters','capsule','about'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
+  if (type === 'about') loadAllAbout();
   document.getElementById('record-'+type).style.display = 'block';
   document.querySelectorAll('#section-record .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1446,12 +1487,12 @@ const balanceQuestions = [
 ];
 
 let balanceIdx = 0;
-let balancePicks = { 호호: null, 수쫑쿠: null };
-let balanceWho = null; // whose turn
+// Store picks per question: { 0: {호호: 'A', 수쫑쿠: 'B'}, ... }
+let balanceAllPicks = {};
 
 function initBalance() {
   balanceIdx = 0;
-  balancePicks = { 호호: null, 수쫑쿠: null };
+  balanceAllPicks = {};
   renderBalanceQ();
 }
 
@@ -1459,80 +1500,94 @@ function renderBalanceQ() {
   const q = balanceQuestions[balanceIdx];
   document.getElementById('balance-num').textContent = (balanceIdx+1) + ' / ' + balanceQuestions.length;
   document.getElementById('balance-q').textContent = q.q;
-  document.getElementById('balance-a-btn').textContent = q.a;
-  document.getElementById('balance-b-btn').textContent = q.b;
-  document.getElementById('balance-a-btn').style.borderColor = 'var(--cream5)';
-  document.getElementById('balance-a-btn').style.background = 'var(--cream4)';
-  document.getElementById('balance-b-btn').style.borderColor = 'var(--cream5)';
-  document.getElementById('balance-b-btn').style.background = 'var(--cream4)';
-  document.getElementById('balance-hoho-pick').textContent = '❓';
-  document.getElementById('balance-sujonku-pick').textContent = '❓';
-  document.getElementById('balance-result').style.display = 'none';
-  document.getElementById('balance-next-btn').style.display = 'none';
-  document.getElementById('balance-who-select').style.display = 'none';
-  _pendingBalanceChoice = null;
-  balancePicks = { 호호: null, 수쫑쿠: null };
+
+  // Set button labels for both rows
+  ['hoho','sujonku'].forEach(who => {
+    document.getElementById(who+'-a-btn').textContent = q.a;
+    document.getElementById(who+'-b-btn').textContent = q.b;
+    // Reset styles
+    ['a','b'].forEach(c => {
+      const btn = document.getElementById(who+'-'+c+'-btn');
+      btn.style.opacity = '1';
+      btn.style.fontWeight = '600';
+    });
+  });
+
+  // Restore saved picks for this question
+  const saved = balanceAllPicks[balanceIdx] || {};
+  highlightPick('호호', saved['호호'] || null);
+  highlightPick('수쫑쿠', saved['수쫑쿠'] || null);
+
+  // Show result if both picked
+  if (saved['호호'] && saved['수쫑쿠']) {
+    showBalanceResult(saved['호호'], saved['수쫑쿠']);
+  } else {
+    document.getElementById('balance-result').style.display = 'none';
+  }
+
+  // Prev button
+  document.getElementById('balance-prev-btn').style.opacity = balanceIdx === 0 ? '0.3' : '1';
 }
 
-let _pendingBalanceChoice = null;
+function highlightPick(who, choice) {
+  const prefix = who === '호호' ? 'hoho' : 'sujonku';
+  const color = who === '호호' ? '#3a6ea8' : '#c04060';
+  const bg = who === '호호' ? '#ddeeff' : '#fde8ed';
+  const defaultBg = who === '호호' ? '#f5f9ff' : '#fff5f7';
+  const defaultBorder = who === '호호' ? '#ddeeff' : '#fde8ed';
 
-function selectBalance(choice) {
-  _pendingBalanceChoice = choice;
-  // Show who selector
-  document.getElementById('balance-who-select').style.display = 'block';
-  // Highlight chosen option temporarily
-  document.getElementById('balance-a-btn').style.borderColor = choice==='A' ? 'var(--accent)' : 'var(--cream5)';
-  document.getElementById('balance-b-btn').style.borderColor = choice==='B' ? 'var(--accent)' : 'var(--cream5)';
-  document.getElementById('balance-a-btn').style.background = choice==='A' ? '#fde8ed' : 'var(--cream4)';
-  document.getElementById('balance-b-btn').style.background = choice==='B' ? '#fde8ed' : 'var(--cream4)';
+  ['a','b'].forEach(c => {
+    const btn = document.getElementById(prefix+'-'+c+'-btn');
+    if (choice && c === choice.toLowerCase()) {
+      btn.style.background = bg;
+      btn.style.borderColor = color;
+      btn.style.color = color;
+    } else {
+      btn.style.background = defaultBg;
+      btn.style.borderColor = defaultBorder;
+      btn.style.color = 'var(--brown1)';
+      btn.style.opacity = choice ? '0.5' : '1';
+    }
+  });
 }
 
-function confirmBalance(who) {
-  if (!_pendingBalanceChoice) return;
-  const choice = _pendingBalanceChoice;
-  balancePicks[who] = choice;
-  document.getElementById('balance-who-select').style.display = 'none';
-  _pendingBalanceChoice = null;
+function pickBalance(who, choice) {
+  if (!balanceAllPicks[balanceIdx]) balanceAllPicks[balanceIdx] = {};
+  balanceAllPicks[balanceIdx][who] = choice;
+  highlightPick(who, choice);
 
-  const q = balanceQuestions[balanceIdx];
-  const label = choice === 'A' ? q.a : q.b;
-
-  if (who === '호호') {
-    document.getElementById('balance-hoho-pick').textContent = label;
-  } else {
-    document.getElementById('balance-sujonku-pick').textContent = label;
-  }
-
-  if (balancePicks.호호 && balancePicks.수쫑쿠) {
-    setTimeout(showBalanceResult, 300);
+  const picks = balanceAllPicks[balanceIdx];
+  if (picks['호호'] && picks['수쫑쿠']) {
+    setTimeout(() => showBalanceResult(picks['호호'], picks['수쫑쿠']), 200);
   }
 }
 
-function showBalanceResult() {
-  const same = balancePicks.호호 === balancePicks.수쫑쿠;
-  const resultEl = document.getElementById('balance-result');
-  resultEl.style.display = 'block';
-  if (same) {
-    document.getElementById('balance-result-emoji').textContent = '💕';
-    document.getElementById('balance-result-text').textContent = '같은 선택! 역시 찰떡궁합~';
-  } else {
-    document.getElementById('balance-result-emoji').textContent = '🤣';
-    document.getElementById('balance-result-text').textContent = '서로 다른 선택! 취향 차이 발견~';
-  }
-  if (balanceIdx < balanceQuestions.length - 1) {
-    document.getElementById('balance-next-btn').style.display = 'block';
-  } else {
-    document.getElementById('balance-result-text').textContent += ' 게임 끝! 🎉';
-  }
+function showBalanceResult(pickHoho, pickSujonku) {
+  const same = pickHoho === pickSujonku;
+  const el = document.getElementById('balance-result');
+  el.style.display = 'block';
+  document.getElementById('balance-result-emoji').textContent = same ? '💕' : '🤣';
+  document.getElementById('balance-result-text').textContent = same ? '같은 선택! 역시 찰떡궁합~' : '서로 다른 선택! 취향 차이 발견~';
+}
+
+function prevBalance() {
+  if (balanceIdx === 0) return;
+  balanceIdx--;
+  renderBalanceQ();
 }
 
 function nextBalance() {
+  if (balanceIdx >= balanceQuestions.length - 1) {
+    toast('마지막 질문이에요! 🎉');
+    return;
+  }
   balanceIdx++;
   renderBalanceQ();
 }
 
 function resetBalance() {
   balanceIdx = 0;
+  balanceAllPicks = {};
   renderBalanceQ();
 }
 
@@ -2172,6 +2227,93 @@ async function swapPhotoOrder(srcId, dstId, items) {
   );
   await Promise.all(updates);
   toast('순서가 변경됐어요 ✨');
+}
+
+// ── About ──
+let _aboutKey = null;
+
+const aboutTitles = {
+  'hoho-self': '🩵 호호 자기소개',
+  'sujonku-self': '🩷 수쫑쿠 자기소개',
+  'hoho-about-sujonku': '🩵 호호가 소개하는 수쫑쿠',
+  'sujonku-about-hoho': '🩷 수쫑쿠가 소개하는 호호',
+};
+
+function editAbout(key) {
+  _aboutKey = key;
+  document.getElementById('about-modal-title').textContent = aboutTitles[key] || '소개 수정';
+  // Load existing data
+  const { doc, getDoc } = window._firebase;
+  getDoc(doc(window._db, 'about', key)).then(snap => {
+    const d = snap.exists() ? snap.data() : {};
+    document.getElementById('about-name').value = d.name || '';
+    document.getElementById('about-mbti').value = d.mbti || '';
+    document.getElementById('about-birth').value = d.birth || '';
+    document.getElementById('about-height').value = d.height || '';
+    document.getElementById('about-shoe').value = d.shoe || '';
+    document.getElementById('about-blood').value = d.blood || '';
+    document.getElementById('about-personality').value = d.personality || '';
+    document.getElementById('about-likes').value = d.likes || '';
+    document.getElementById('about-memo').value = d.memo || '';
+  });
+  openModal('about-edit');
+}
+
+async function saveAbout() {
+  if (!_aboutKey) return;
+  const { doc, setDoc } = window._firebase;
+  const data = {
+    name: document.getElementById('about-name').value.trim(),
+    mbti: document.getElementById('about-mbti').value.trim(),
+    birth: document.getElementById('about-birth').value.trim(),
+    height: document.getElementById('about-height').value.trim(),
+    shoe: document.getElementById('about-shoe').value.trim(),
+    blood: document.getElementById('about-blood').value.trim(),
+    personality: document.getElementById('about-personality').value.trim(),
+    likes: document.getElementById('about-likes').value.trim(),
+    memo: document.getElementById('about-memo').value.trim(),
+  };
+  await setDoc(doc(window._db, 'about', _aboutKey), data);
+  closeModal('about-edit');
+  toast('저장됐어요 💕');
+  renderAbout(_aboutKey, data);
+}
+
+function renderAbout(key, data) {
+  const el = document.getElementById('about-'+key+'-view');
+  if (!el) return;
+  const fields = [
+    data.name && ['이름', data.name],
+    data.birth && ['생일', data.birth],
+    data.mbti && ['MBTI', data.mbti],
+    data.height && ['키', data.height],
+    data.shoe && ['발 사이즈', data.shoe],
+    data.blood && ['혈액형', data.blood],
+    data.personality && ['성격', data.personality],
+    data.likes && ['좋아하는 것', data.likes],
+    data.memo && ['한마디', data.memo],
+  ].filter(Boolean);
+
+  if (!fields.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--brown3);text-align:center;padding:10px;">아직 작성하지 않았어요</div>';
+    return;
+  }
+  el.innerHTML = fields.map(([k,v]) => `
+    <div style="display:flex;gap:8px;margin-bottom:6px;font-size:12px;">
+      <span style="color:var(--brown3);min-width:64px;flex-shrink:0;">${k}</span>
+      <span style="color:var(--brown1);font-weight:500;">${v}</span>
+    </div>`).join('');
+}
+
+function loadAllAbout() {
+  const { doc, getDoc } = window._firebase;
+  const keys = ['hoho-self','sujonku-self','hoho-about-sujonku','sujonku-about-hoho'];
+  keys.forEach(key => {
+    getDoc(doc(window._db, 'about', key)).then(snap => {
+      if (snap.exists()) renderAbout(key, snap.data());
+      else renderAbout(key, {});
+    });
+  });
 }
 
 // ── Save functions ──
@@ -3013,6 +3155,49 @@ window.addEventListener('firebase-ready', () => {
   }, 500);
 });
 </script>
+
+<!-- About edit modal -->
+<div class="modal-backdrop" id="modal-about-edit">
+  <div class="modal">
+    <h3 id="about-modal-title">소개 수정</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">이름</div>
+        <input type="text" id="about-name" placeholder="이름" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">MBTI</div>
+        <input type="text" id="about-mbti" placeholder="MBTI" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">생일</div>
+        <input type="text" id="about-birth" placeholder="생일" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">키</div>
+        <input type="text" id="about-height" placeholder="키" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">발 사이즈</div>
+        <input type="text" id="about-shoe" placeholder="발 사이즈" />
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">혈액형</div>
+        <input type="text" id="about-blood" placeholder="혈액형" />
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">성격 / 특징</div>
+    <textarea id="about-personality" rows="2" placeholder="성격이나 특징을 소개해줘요"></textarea>
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">좋아하는 것</div>
+    <input type="text" id="about-likes" placeholder="좋아하는 음식, 취미 등" />
+    <div style="font-size:10px;color:var(--brown3);margin-bottom:4px;">한마디</div>
+    <input type="text" id="about-memo" placeholder="한마디 남기기" />
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal('about-edit')">취소</button>
+      <button class="modal-save" onclick="saveAbout()">저장하기</button>
+    </div>
+  </div>
+</div>
 
 <!-- Travel modal -->
 <div class="modal-backdrop" id="modal-travel-plan">
