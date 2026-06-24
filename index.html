@@ -519,29 +519,15 @@
       <!-- 우리 소개 -->
       <div id="record-about" style="display:none;">
         <div class="sec-title">💑 우리를 기록해요</div>
-
-        <!-- 호호 자기소개 -->
-        <div class="card" style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩵 호호</div>
-            <button onclick="editAbout('hoho-self')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
-          </div>
-          <div id="about-hoho-self-view"></div>
-        </div>
-
-        <!-- 수쫑쿠 자기소개 -->
-        <div class="card" style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩷 수쫑쿠</div>
-            <button onclick="editAbout('sujonku-self')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
-          </div>
-          <div id="about-sujonku-self-view"></div>
-        </div>
+        <div style="font-size:11px;color:var(--brown3);margin-bottom:12px;">서로가 써주는 소개예요 🥰</div>
 
         <!-- 호호가 수쫑쿠를 소개 -->
         <div class="card" style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩵 호호가 소개하는 수쫑쿠</div>
+            <div>
+              <div style="font-size:11px;color:var(--brown3);">🩵 호호가 쓰는</div>
+              <div style="font-size:14px;font-weight:700;color:var(--brown1);">수쫑쿠 소개</div>
+            </div>
             <button onclick="editAbout('hoho-about-sujonku')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
           </div>
           <div id="about-hoho-about-sujonku-view"></div>
@@ -550,7 +536,10 @@
         <!-- 수쫑쿠가 호호를 소개 -->
         <div class="card" style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-size:13px;font-weight:700;color:var(--brown1);">🩷 수쫑쿠가 소개하는 호호</div>
+            <div>
+              <div style="font-size:11px;color:var(--brown3);">🩷 수쫑쿠가 쓰는</div>
+              <div style="font-size:14px;font-weight:700;color:var(--brown1);">호호 소개</div>
+            </div>
             <button onclick="editAbout('sujonku-about-hoho')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
           </div>
           <div id="about-sujonku-about-hoho-view"></div>
@@ -2233,18 +2222,16 @@ async function swapPhotoOrder(srcId, dstId, items) {
 let _aboutKey = null;
 
 const aboutTitles = {
-  'hoho-self': '🩵 호호 자기소개',
-  'sujonku-self': '🩷 수쫑쿠 자기소개',
-  'hoho-about-sujonku': '🩵 호호가 소개하는 수쫑쿠',
-  'sujonku-about-hoho': '🩷 수쫑쿠가 소개하는 호호',
+  'hoho-about-sujonku': '🩵 호호가 쓰는 수쫑쿠 소개',
+  'sujonku-about-hoho': '🩷 수쫑쿠가 쓰는 호호 소개',
 };
 
 function editAbout(key) {
   _aboutKey = key;
   document.getElementById('about-modal-title').textContent = aboutTitles[key] || '소개 수정';
   // Show basic fields only for self intro
-  const isSelf = key.endsWith('-self');
-  document.getElementById('about-basic-fields').style.display = isSelf ? 'block' : 'none';
+  const isSelf = true; // always show all fields
+  document.getElementById('about-basic-fields').style.display = 'block';
   const { doc, getDoc } = window._firebase;
   getDoc(doc(window._db, 'about', key)).then(snap => {
     const d = snap.exists() ? snap.data() : {};
@@ -2266,16 +2253,13 @@ function editAbout(key) {
 async function saveAbout() {
   if (!_aboutKey) return;
   const { doc, setDoc } = window._firebase;
-  const isSelf = _aboutKey.endsWith('-self');
   const data = {
-    ...(isSelf && {
-      name: document.getElementById('about-name').value.trim(),
-      mbti: document.getElementById('about-mbti').value.trim(),
-      birth: document.getElementById('about-birth').value.trim(),
-      height: document.getElementById('about-height').value.trim(),
-      shoe: document.getElementById('about-shoe').value.trim(),
-      blood: document.getElementById('about-blood').value.trim(),
-    }),
+    name: document.getElementById('about-name').value.trim(),
+    mbti: document.getElementById('about-mbti').value.trim(),
+    birth: document.getElementById('about-birth').value.trim(),
+    height: document.getElementById('about-height').value.trim(),
+    shoe: document.getElementById('about-shoe').value.trim(),
+    blood: document.getElementById('about-blood').value.trim(),
     personality: document.getElementById('about-personality').value.trim(),
     trait: document.getElementById('about-trait').value.trim(),
     likes: document.getElementById('about-likes').value.trim(),
@@ -2291,7 +2275,7 @@ async function saveAbout() {
 function renderAbout(key, data) {
   const el = document.getElementById('about-'+key+'-view');
   if (!el) return;
-  const isSelf = key.endsWith('-self');
+  const isSelf = true; // always show all fields
 
   const basicFields = isSelf ? [
     data.name && ['👤 이름', data.name],
@@ -2337,7 +2321,7 @@ function renderAbout(key, data) {
 
 function loadAllAbout() {
   const { doc, getDoc } = window._firebase;
-  const keys = ['hoho-self','sujonku-self','hoho-about-sujonku','sujonku-about-hoho'];
+  const keys = ['hoho-about-sujonku','sujonku-about-hoho'];
   keys.forEach(key => {
     getDoc(doc(window._db, 'about', key)).then(snap => {
       if (snap.exists()) renderAbout(key, snap.data());
