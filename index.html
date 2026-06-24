@@ -374,6 +374,22 @@
             <div class="dday-label" id="next-anni-name">다음 기념일</div>
           </div>
         </div>
+
+        <div id="weather-box" style="background:var(--cream4);border-radius:10px;padding:8px 12px;margin-top:6px;margin-bottom:0px;font-size:12px;color:var(--brown2);display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span id="weather-icon" style="font-size:20px;">🌤️</span>
+            <div>
+              <div id="weather-temp" style="font-size:13px;font-weight:600;color:var(--brown1);">--°C</div>
+              <div id="weather-desc" style="font-size:10px;color:var(--brown3);">부산 날씨</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div id="weather-rain" style="font-size:10px;color:var(--brown3);">강수확률 --%</div>
+            <div id="weather-msg" style="font-size:10px;color:var(--accent);font-weight:600;"></div>
+          </div>
+        </div>
+
+
         <div id="weather-box" style="background:var(--cream4);border-radius:10px;padding:8px 12px;margin-top:6px;margin-bottom:0px;font-size:12px;color:var(--brown2);display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <div style="display:flex;align-items:center;gap:6px;">
             <span id="weather-icon" style="font-size:20px;">🌤️</span>
@@ -2725,6 +2741,14 @@ window.addEventListener('firebase-ready', () => {
   onSnapshot(query(collection(db,'travel_plans'), orderBy('createdAt','desc')), snap => {
     renderTravelList(snap.docs.map(d => ({id:d.id,...d.data()})));
   });
+
+  // Calculate D+day from 2025-06-16
+  const startDate = new Date('2025-06-16T00:00:00+09:00');
+  const todayDate = new Date();
+  todayDate.setHours(0,0,0,0);
+  startDate.setHours(0,0,0,0);
+  const diffDays = Math.floor((todayDate - startDate) / (1000*60*60*24));
+  document.getElementById('main-dday').textContent = 'D+' + diffDays;
 
   document.getElementById('loading').style.display = 'none';
   getTodayQuestion();
