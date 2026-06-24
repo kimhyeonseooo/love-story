@@ -87,7 +87,7 @@
     .meta-who.sujonku { background: white; color: #e8849a; border: 1.5px solid #e8849a; }
 
     /* ── HOME ── */
-    .home-header { background: transparent; padding: 44px 0 6px; }
+    .home-header { background: transparent; padding: 50px 0 10px; }
     .home-title { font-size: 24px; font-weight: 700; color: var(--brown1); text-align: center; margin-bottom: 4px; font-family: 'Gaegu', cursive; letter-spacing: 1px; }
     .home-sub { font-size: 12px; color: var(--brown3); text-align: center; margin-bottom: 16px; }
     .dday-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px; }
@@ -1799,7 +1799,7 @@ function renderPhotoGrid(items) {
   const addCell = `<div class="photo-cell add-photo-cell" onclick="document.getElementById('photo-input').click()"><div class="add-label"><i class="ti ti-plus"></i><span>추가</span></div></div>`;
   const grid = document.getElementById('photo-grid');
   if (!grid) return;
-  grid.innerHTML = items.map((i, idx) => `<div class="photo-cell" id="photo-${i.id}" data-id="${i.id}" data-idx="${idx}" draggable="${!photoEditMode}">
+  grid.innerHTML = items.map((i, idx) => `<div class="photo-cell" id="photo-${i.id}" data-id="${i.id}" data-idx="${idx}" draggable="${photoEditMode}">
     <img src="${i.url}" loading="lazy" />
     ${i.memo ? `<div class="photo-memo-badge">${i.memo}</div>` : ''}
     ${photoEditMode ? `<div class="photo-num-badge">${idx+1}</div>` : ''}
@@ -1830,6 +1830,7 @@ function initPhotoDrag(items) {
 }
 
 function initPhotoDragCell(cell, i, items) {
+  if (!photoEditMode) return; // only drag in edit mode
   const cells = document.querySelectorAll('#photo-grid .photo-cell[data-id]');
   cells.forEach(cell => {
     // Desktop drag
