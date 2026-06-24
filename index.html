@@ -367,11 +367,24 @@
         <div class="dday-cards">
           <div class="dday-card">
             <div class="dday-num" id="main-dday">D+0</div>
-            <div class="dday-label">사귄 날부터</div>
+            <div class="dday-label">함께한 날 🤍</div>
           </div>
           <div class="dday-card">
             <div class="dday-num" id="next-anni-d">D-?</div>
             <div class="dday-label" id="next-anni-name">다음 기념일</div>
+          </div>
+        </div>
+        <div id="weather-box" style="background:var(--cream4);border-radius:10px;padding:8px 12px;margin-top:6px;margin-bottom:0px;font-size:12px;color:var(--brown2);display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span id="weather-icon" style="font-size:20px;">🌤️</span>
+            <div>
+              <div id="weather-temp" style="font-size:13px;font-weight:600;color:var(--brown1);">--°C</div>
+              <div id="weather-desc" style="font-size:10px;color:var(--brown3);">부산 날씨</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div id="weather-rain" style="font-size:10px;color:var(--brown3);">강수확률 --%</div>
+            <div id="weather-msg" style="font-size:10px;color:var(--accent);font-weight:600;"></div>
           </div>
         </div>
         <div style="text-align:center;margin-top:4px;" id="today-music-box" style="cursor:pointer;-webkit-user-select:none;user-select:none;" onclick="openModal('today-music')">
@@ -1112,6 +1125,52 @@ async function updateTodayMusic() {
   await updateDoc(doc(window._db, 'todaymusic', _actionTarget.id), { song });
   closeModal('edit-todaymusic');
   toast('음악이 수정됐어요 🎵');
+}
+
+// ── Weather ──
+async function loadWeather() {
+  try {
+    // Busan coords: 35.1796, 129.0756
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current=temperature_2m,weather_code,precipitation_probability&timezone=Asia%2FSeoul');
+    const data = await res.json();
+    const temp = Math.round(data.current.temperature_2m);
+    const code = data.current.weather_code;
+    const rain = data.current.precipitation_probability;
+
+    // Weather icon and description
+    let icon, desc;
+    if (code === 0) { icon = '☀️'; desc = '맑음'; }
+    else if (code <= 2) { icon = '🌤️'; desc = '구름 조금'; }
+    else if (code === 3) { icon = '☁️'; desc = '흐림'; }
+    else if (code <= 49) { icon = '🌫️'; desc = '안개'; }
+    else if (code <= 59) { icon = '🌦️'; desc = '이슬비'; }
+    else if (code <= 69) { icon = '🌧️'; desc = '비'; }
+    else if (code <= 79) { icon = '❄️'; desc = '눈'; }
+    else if (code <= 82) { icon = '🌧️'; desc = '소나기'; }
+    else { icon = '⛈️'; desc = '뇌우'; }
+
+    // Mood message
+    let msg = '';
+    if (rain >= 70) msg = '☂️ 수쫑쿠야 오늘 비 많이 온대! 우산 꼭 챙겨 알겠지?';
+    else if (rain >= 50) msg = '🌂 수쫑쿠야~ 오늘 비 올 수도 있으니까 우산 챙겨가!';
+    else if (code === 0 && temp >= 28) msg = '☀️ 날씨 완전 쨍쨍해 수쫑쿠야~ 나들이 가자!';
+    else if (code === 0 && temp >= 20) msg = '🌞 날씨 너무 좋다 수쫑쿠야~ 같이 놀러 가기 딱이야!';
+    else if (code === 0) msg = '☀️ 오늘 날씨 완전 맑아 수쫑쿠야!';
+    else if (code <= 2) msg = '🌤️ 수쫑쿠야 오늘 나들이 딱 좋겠다~';
+    else if (code === 3) msg = '☁️ 수쫑쿠야 흐린 날엔 따뜻하게 입어!';
+    else if (code <= 59) msg = '🌦️ 비가 살짝 와도 수쫑쿠랑 있으면 설레~';
+    else if (code <= 69) msg = '🌧️ 비 소리 들으면서 수쫑쿠 생각난다~';
+    else if (code <= 79) msg = '❄️ 수쫑쿠야 눈 온다!! 같이 보러 가자~';
+    else msg = '⛈️ 천둥쳐도 수쫑쿠랑 있으면 하나도 안 무서워!';
+
+    document.getElementById('weather-icon').textContent = icon;
+    document.getElementById('weather-temp').textContent = temp + '°C';
+    document.getElementById('weather-desc').textContent = '부산 ' + desc;
+    document.getElementById('weather-rain').textContent = '강수확률 ' + rain + '%';
+    document.getElementById('weather-msg').textContent = msg;
+  } catch(e) {
+    document.getElementById('weather-desc').textContent = '날씨 정보를 불러올 수 없어요';
+  }
 }
 
 function loadTodayQuote() {
@@ -2671,6 +2730,7 @@ window.addEventListener('firebase-ready', () => {
   getTodayQuestion();
   loadTodayQuote();
   loadTodayMusic();
+  loadWeather();
   renderCalendar();
   renderScheduleCalendar();
   // Auto-select today in diary
