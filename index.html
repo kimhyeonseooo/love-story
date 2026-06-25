@@ -482,6 +482,17 @@
         <button class="add-btn" id="diary-add-btn" onclick="openDiaryWrite()" style="display:none;"><i class="ti ti-plus"></i> 일기 쓰기</button>
         <div class="write-area" id="diary-write-area" style="display:none;">
           <textarea id="diary-input" rows="3" placeholder="오늘 하루를 기록해요..."></textarea>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:11px;color:var(--brown3);">오늘의 기분</span>
+            <div id="diary-stars" style="display:flex;gap:3px;">
+              <span onclick="setDiaryStar(1)" style="font-size:20px;cursor:pointer;">⭐</span>
+              <span onclick="setDiaryStar(2)" style="font-size:20px;cursor:pointer;">⭐</span>
+              <span onclick="setDiaryStar(3)" style="font-size:20px;cursor:pointer;">⭐</span>
+              <span onclick="setDiaryStar(4)" style="font-size:20px;cursor:pointer;">⭐</span>
+              <span onclick="setDiaryStar(5)" style="font-size:20px;cursor:pointer;">⭐</span>
+            </div>
+            <span id="diary-star-label" style="font-size:10px;color:var(--brown3);">최고!</span>
+          </div>
           <div class="write-footer">
             <select class="who-select" id="diary-who"><option>호호</option><option>수쫑쿠</option></select>
             <button class="submit-btn" onclick="saveDiary()">저장하기</button>
@@ -1032,7 +1043,17 @@
     </div>
     <div id="place-search-results" style="max-height:160px;overflow-y:auto;margin-bottom:10px;"></div>
     <input type="date" id="place-date-input" />
-    <input type="number" id="place-rating" placeholder="별점 (1~5)" min="1" max="5" />
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:12px;color:var(--brown3);">별점</span>
+      <div id="place-stars" style="display:flex;gap:4px;">
+        <span onclick="setPlaceStar(1)" style="font-size:22px;cursor:pointer;">⭐</span>
+        <span onclick="setPlaceStar(2)" style="font-size:22px;cursor:pointer;">⭐</span>
+        <span onclick="setPlaceStar(3)" style="font-size:22px;cursor:pointer;">⭐</span>
+        <span onclick="setPlaceStar(4)" style="font-size:22px;cursor:pointer;">⭐</span>
+        <span onclick="setPlaceStar(5)" style="font-size:22px;cursor:pointer;">⭐</span>
+      </div>
+    </div>
+    <input type="hidden" id="place-rating" value="5"/>
     <input type="text" id="place-memo-input" placeholder="메모" />
     <div class="modal-btns"><button class="modal-cancel" onclick="closeModal('place')">취소</button><button class="modal-save" onclick="savePlace()">추가하기</button></div>
   </div>
@@ -2026,8 +2047,9 @@ function renderDiaryList(items) {
       : '<div class="empty"><i class="ti ti-notebook"></i>달력에서 날짜를 선택해주세요</div>';
     return;
   }
+  const starStr = n => n ? '⭐'.repeat(n) : '';
   el.innerHTML = items.map(i => `<div class="card" id="diary-${i.id}">
-    <div class="meta-row"><span class="meta-date">${fmt(i.date)}</span><span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who||'호호'}</span></div>
+    <div class="meta-row"><span class="meta-date">${fmt(i.date)}</span><span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who||'호호'}</span>${i.star ? `<span style="font-size:11px;">${starStr(i.star)}</span>` : ''}</div>
     <div class="card-text">${i.text}</div>
   </div>`).join('');
   items.forEach(i => {
@@ -2456,8 +2478,10 @@ async function saveDiary() {
   const who = document.getElementById('diary-who').value;
   const { collection, addDoc } = window._firebase;
   const date = selectedDiaryDate ? selectedDiaryDate + 'T12:00:00.000Z' : new Date().toISOString();
-  await addDoc(collection(window._db, 'diary'), { text, who, date });
+  await addDoc(collection(window._db, 'diary'), { text, who, date, star: _diaryStar });
   document.getElementById('diary-input').value = '';
+  _diaryStar = 5;
+  setDiaryStar(5);
   toast('일기가 저장됐어요 🤍');
 }
 
@@ -2472,6 +2496,25 @@ function setStar(n) {
   });
   const labels = ['', '별로였어 😅', '그냥 그랬어', '좋았어 😊', '너무 좋았어! 😍', '완벽한 데이트! 💕'];
   document.getElementById('datelog-star-label').textContent = labels[n];
+}
+
+// ── Star ratings ──
+let _diaryStar = 5;
+let _placeStar = 5;
+
+function setDiaryStar(n) {
+  _diaryStar = n;
+  const stars = document.querySelectorAll('#diary-stars span');
+  stars.forEach((s,i) => s.style.filter = i < n ? 'none' : 'grayscale(1) opacity(0.3)');
+  const labels = ['','힘든 하루 😢','그냥 그런 날','보통이었어 😊','좋은 하루! 😍','최고의 하루! 💕'];
+  document.getElementById('diary-star-label').textContent = labels[n];
+}
+
+function setPlaceStar(n) {
+  _placeStar = n;
+  document.getElementById('place-rating').value = n;
+  const stars = document.querySelectorAll('#place-stars span');
+  stars.forEach((s,i) => s.style.filter = i < n ? 'none' : 'grayscale(1) opacity(0.3)');
 }
 
 function initDatelog() {
@@ -2983,8 +3026,9 @@ window.addEventListener('firebase-ready', () => {
   renderScheduleCalendar();
     const el = document.getElementById('diary-list');
     if (!items.length) { el.innerHTML = '<div class="empty"><i class="ti ti-notebook"></i>첫 번째 일기를 써보세요</div>'; return; }
+    const starStr2 = n => n ? '⭐'.repeat(n) : '';
     el.innerHTML = items.map(i => `<div class="card" id="diary-${i.id}">
-      <div class="meta-row"><span class="meta-date">${fmt(i.date)}</span><span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who||'호호'}</span></div>
+      <div class="meta-row"><span class="meta-date">${fmt(i.date)}</span><span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who||'호호'}</span>${i.star ? `<span style="font-size:11px;">${starStr2(i.star)}</span>` : ''}</div>
       <div class="card-text">${i.text}</div>
     </div>`).join('');
     items.forEach(i => {
