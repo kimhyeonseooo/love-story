@@ -1258,8 +1258,8 @@ function loadTodayMusic() {
   const { collection, onSnapshot, query, orderBy } = window._firebase;
   onSnapshot(query(collection(window._db, 'todaymusic'), orderBy('date','desc')), snap => {
     const items = snap.docs.map(d => ({id:d.id,...d.data()}));
-    const today = new Date().toISOString().slice(0,10);
-    const todayMusic = items.find(i => i.date === today);
+    // Show latest music (no date filter - persistent)
+    const todayMusic = items[0] || null;
     const box = document.getElementById('today-music-box');
     if (todayMusic) {
       _currentMusic = todayMusic;
@@ -1280,7 +1280,11 @@ function loadTodayMusic() {
       });
       // 노래 텍스트 클릭하면 수정/삭제
       const songText = document.getElementById('music-song-text');
-      songText.addEventListener('click', () => showAction('todaymusic', todayMusic.id, todayMusic.song, todayMusic));
+      songText.addEventListener('click', () => {
+        document.getElementById('edit-music-input').value = todayMusic.song;
+        _actionTarget = { col:'todaymusic', id:todayMusic.id };
+        openModal('edit-todaymusic');
+      });
     } else {
       _currentMusic = null;
       box.innerHTML = `<div style="font-size:11px;color:var(--brown3);">🎵 오늘의 음악을 추천해주세요!</div>`;
@@ -1293,11 +1297,10 @@ async function saveTodayMusic() {
   const song = document.getElementById('today-music-input').value.trim();
   if (!song) { toast('노래 제목을 입력해주세요'); return; }
   const { collection, addDoc } = window._firebase;
-  const today = new Date().toISOString().slice(0,10);
-  await addDoc(collection(window._db, 'todaymusic'), { song, date: today });
+  await addDoc(collection(window._db, 'todaymusic'), { song, date: new Date().toISOString() });
   document.getElementById('today-music-input').value = '';
   closeModal('today-music');
-  toast('음악 추천이 저장됐어요 🎵');
+  toast('음악이 저장됐어요 🎵');
 }
 
 async function updateTodayMusic() {
