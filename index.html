@@ -962,7 +962,7 @@
   <div class="modal"><h3>위시리스트 추가</h3>
     <input type="text" id="wish-text" placeholder="갖고 싶은 것" />
     <select id="wish-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
-      <option value="me">나의 위시</option><option value="partner">연인의 위시</option><option value="both">우리 함께</option>
+      <option value="호호">호호</option><option value="수쫑쿠">수쫑쿠</option><option value="both">우리 함께</option>
     </select>
     <div class="modal-btns"><button class="modal-cancel" onclick="closeModal('wish')">취소</button><button class="modal-save" onclick="saveWish()">추가하기</button></div>
   </div>
@@ -3183,7 +3183,7 @@ window.addEventListener('firebase-ready', () => {
     const el = document.getElementById('wish-list');
     const items = snap.docs.map(d => ({id:d.id,...d.data()}));
     if (!items.length) { el.innerHTML = '<div class="empty"><i class="ti ti-gift"></i>갖고 싶은 것들을 적어보세요</div>'; return; }
-    const whoLabel = { me:'나의 위시', partner:'연인의 위시', both:'우리 함께' };
+    const whoLabel = { 호호:'호호', 수쫑쿠:'수쫑쿠', both:'우리 함께' };
     el.innerHTML = items.map(i => `<div class="wish-item${i.done?' done':''}" onclick="toggleWish('${i.id}',${i.done})" id="wish-${i.id}">
       <div class="bcheck">${i.done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
       <span class="btext">${i.text}</span>
