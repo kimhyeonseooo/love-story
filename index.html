@@ -1042,7 +1042,7 @@
       <button class="modal-save" onclick="searchPlace()" style="flex:0;padding:10px 14px;white-space:nowrap;">검색</button>
     </div>
     <div id="place-search-results" style="max-height:160px;overflow-y:auto;margin-bottom:10px;"></div>
-    <div id="place-date-wrap">
+    <div id="place-date-wrap" style="display:none;">
       <input type="date" id="place-date-input" />
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -2791,7 +2791,7 @@ function renderPlaceList(items) {
     <div style="flex:1;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span class="place-name">${i.name}</span>
-        <span class="place-date">${i.date||''}</span>
+        ${i.type==='visited' && i.date ? `<span class="place-date">${i.date}</span>` : ''}
       </div>
       ${i.rating ? `<div class="place-stars">${'★'.repeat(i.rating)}${'☆'.repeat(5-i.rating)}</div>` : ''}
       ${i.memo ? `<div class="place-memo">${i.memo}</div>` : ''}
@@ -3429,12 +3429,15 @@ window.addEventListener('firebase-ready', () => {
   });
 
   // Calculate D+day from 2025-06-16
-  const _start = new Date('2025-06-16');
-  const _today = new Date();
-  const _su = Date.UTC(_start.getFullYear(), _start.getMonth(), _start.getDate());
-  const _tu = Date.UTC(_today.getFullYear(), _today.getMonth(), _today.getDate());
-  const diffDays = Math.floor((_tu - _su) / (1000*60*60*24));
-  document.getElementById('main-dday').textContent = 'D+' + diffDays;
+  (function() {
+    const now = new Date();
+    const kst = new Date(now.getTime() + 9*60*60*1000);
+    const y = kst.getUTCFullYear(), m = kst.getUTCMonth()+1, d = kst.getUTCDate();
+    const startMs = Date.UTC(2025, 5, 16); // 2025-06-16
+    const todayMs = Date.UTC(y, m-1, d);
+    const diff = Math.floor((todayMs - startMs) / 86400000);
+    document.getElementById('main-dday').textContent = 'D+' + diff;
+  })();
 
   document.getElementById('loading').style.display = 'none';
   getTodayQuestion();
