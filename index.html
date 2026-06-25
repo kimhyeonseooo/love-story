@@ -1895,6 +1895,11 @@ function executeEdit() {
     document.getElementById('edit-anni-name').value = d.name || '';
     document.getElementById('edit-anni-date').value = d.date || '';
     openModal('edit-anni');
+  } else if (col === 'places') {
+    document.getElementById('edit-place-name').value = d.name || '';
+    document.getElementById('edit-place-memo').value = d.memo || '';
+    setEditPlaceStar(d.rating || 5);
+    openModal('edit-place');
   }
 }
 
@@ -1924,6 +1929,9 @@ async function updateItem() {
   } else if (col === 'anniversaries') {
     data = { emoji: document.getElementById('edit-anni-emoji').value.trim(), name: document.getElementById('edit-anni-name').value.trim(), date: document.getElementById('edit-anni-date').value };
     closeModal('edit-anni');
+  } else if (col === 'places') {
+    data = { name: document.getElementById('edit-place-name').value.trim(), memo: document.getElementById('edit-place-memo').value.trim(), rating: parseInt(document.getElementById('edit-place-rating').value) };
+    closeModal('edit-place');
   }
   await updateDoc(doc(window._db, col, id), data);
   toast('수정됐어요 ✏️');
@@ -2511,6 +2519,12 @@ function setDiaryStar(n) {
   stars.forEach((s,i) => s.style.filter = i < n ? 'none' : 'grayscale(1) opacity(0.3)');
   const labels = ['','힘든 하루 😢','그냥 그런 날','보통이었어 😊','좋은 하루! 😍','최고의 하루! 💕'];
   document.getElementById('diary-star-label').textContent = labels[n];
+}
+
+function setEditPlaceStar(n) {
+  document.getElementById('edit-place-rating').value = n;
+  const stars = document.querySelectorAll('#edit-place-stars span');
+  stars.forEach((s,i) => s.style.filter = i < n ? 'none' : 'grayscale(1) opacity(0.3)');
 }
 
 function setPlaceStar(n) {
