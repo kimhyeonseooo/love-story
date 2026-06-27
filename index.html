@@ -3428,13 +3428,12 @@ window.addEventListener('firebase-ready', () => {
     renderTravelList(snap.docs.map(d => ({id:d.id,...d.data()})));
   });
 
-  // Calculate D+day from 2025-06-16
+  // Calculate D+day from 2025-06-16 (KST)
   (function() {
     const now = new Date();
-    const kst = new Date(now.getTime() + 9*60*60*1000);
-    const y = kst.getUTCFullYear(), m = kst.getUTCMonth()+1, d = kst.getUTCDate();
-    const startMs = Date.UTC(2025, 5, 16); // 2025-06-16
-    const todayMs = Date.UTC(y, m-1, d);
+    const kst = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Seoul'}));
+    const startMs = new Date(2025, 5, 16).getTime(); // 2025-06-16
+    const todayMs = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate()).getTime();
     const diff = Math.floor((todayMs - startMs) / 86400000);
     document.getElementById('main-dday').textContent = 'D+' + diff;
   })();
