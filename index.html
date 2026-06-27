@@ -569,7 +569,7 @@
         <div class="card" style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <div>
-              <div style="font-size:11px;color:var(--brown3);">🩵 호호가 쓰는</div>
+              <div style="font-size:11px;color:var(--brown3);">🩷 호호가 쓰는</div>
               <div style="font-size:14px;font-weight:700;color:var(--brown1);">수쫑쿠 소개</div>
             </div>
             <button onclick="editAbout('hoho-about-sujonku')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
@@ -581,7 +581,7 @@
         <div class="card" style="margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <div>
-              <div style="font-size:11px;color:var(--brown3);">🩷 수쫑쿠가 쓰는</div>
+              <div style="font-size:11px;color:var(--brown3);">🩵 수쫑쿠가 쓰는</div>
               <div style="font-size:14px;font-weight:700;color:var(--brown1);">호호 소개</div>
             </div>
             <button onclick="editAbout('sujonku-about-hoho')" style="background:var(--cream4);border:0.5px solid var(--cream5);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--brown2);cursor:pointer;font-family:inherit;">수정</button>
@@ -3434,7 +3434,7 @@ window.addEventListener('firebase-ready', () => {
     const kst = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Seoul'}));
     const startMs = new Date(2025, 5, 16).getTime(); // 2025-06-16
     const todayMs = new Date(kst.getFullYear(), kst.getMonth(), kst.getDate()).getTime();
-    const diff = Math.floor((todayMs - startMs) / 86400000);
+    const diff = Math.floor((todayMs - startMs) / 86400000) + 1;
     document.getElementById('main-dday').textContent = 'D+' + diff;
   })();
 
