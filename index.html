@@ -1646,6 +1646,7 @@ function setDreamAirline(key) {
     img.src = photo;
     img.style.filter = 'none';
     document.getElementById('dream-msg').textContent = dreamMessages[key] || '꿈을 이룬 수쫑쿠의 모습 ♥️🥺♥️';
+  if (dreamMessages[key]) toast(dreamMessages[key]);
   } else {
     img.src = dreamPhotos.default;
     img.style.filter = `hue-rotate(0deg) saturate(1)`;
