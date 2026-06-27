@@ -1623,6 +1623,15 @@ const dreamNames = {
   eastar: '이스타항공', tway: '티웨이항공',
 };
 
+const dreamMessages = {
+  korean:   '수쫑쿠라면 대한항공도 문제없어 👑 최고의 승무원이 될 거야 ✈️❤️',
+  jeju:     '발랄하고 사랑스러운 수쫑쿠한테 제주항공 유니폼 찰떡이야 🍊😆 꼭 이루자!',
+  airbusan: '에어부산 네이비 유니폼이 수쫑쿠한테 너무 잘 어울려 😍💙 합격 기원!',
+  eastar:   '수쫑쿠의 꿈을 응원해 ⭐ 하늘 위에서 빛날 날이 올 거야 ♥️🥺♥️',
+  tway:     '포기하지 마 수쫑쿠 🫶 그 날개로 반드시 하늘을 날 거야 ♥️🥺♥️',
+  jinair:   '수쫑쿠 화이팅 💚 꿈꾸는 자에게 하늘은 열려있어 ♥️🥺♥️',
+};
+
 const dreamColors = {
   default: '#e8849a', korean: '#87CEEB',
   jeju: '#FF6600', airbusan: '#1B3B9C', jinair: '#00A550',
@@ -1636,7 +1645,7 @@ function setDreamAirline(key) {
   if (photo) {
     img.src = photo;
     img.style.filter = 'none';
-    document.getElementById('dream-msg').textContent = key === 'default' ? '꿈을 이룬 수쫑쿠의 모습 ♥️🥺♥️' : `${dreamNames[key]} 승무원 수쫑쿠 ♥️🥺♥️`;
+    document.getElementById('dream-msg').textContent = dreamMessages[key] || '꿈을 이룬 수쫑쿠의 모습 ♥️🥺♥️';
   } else {
     img.src = dreamPhotos.default;
     img.style.filter = `hue-rotate(0deg) saturate(1)`;
