@@ -3282,10 +3282,18 @@ window.addEventListener('firebase-ready', () => {
     allSchedules = snap.docs.map(d => ({id:d.id,...d.data()}));
     scheduleDates = {};
     allSchedules.forEach(s => { if(s.date) scheduleDates[s.date] = true; });
+    if (!selectedScheduleDate) {
+      const t = new Date();
+      selectedScheduleDate = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+    }
     renderScheduleCalendar();
-    if (selectedScheduleDate) {
-      const filtered = allSchedules.filter(s => s.date === selectedScheduleDate);
-      renderScheduleList(filtered);
+    const filtered = allSchedules.filter(s => s.date === selectedScheduleDate);
+    renderScheduleList(filtered);
+    const dateEl = document.getElementById('schedule-selected-date');
+    if (dateEl) {
+      const d = new Date(selectedScheduleDate);
+      dateEl.textContent = '📅 ' + (d.getFullYear()) + '년 ' + (d.getMonth()+1) + '월 ' + (d.getDate()) + '일 일정';
+      dateEl.style.display = 'block';
     }
   });
 
