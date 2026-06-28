@@ -1080,7 +1080,7 @@
     <h3>📅 일정 추가</h3>
     <input type="text" id="schedule-title-input" placeholder="일정 제목 (예: 면접, 데이트)" />
     <input type="date" id="schedule-date-input" />
-    <input type="time" id="schedule-time-input" />
+    <input type="time" id="schedule-time-input" placeholder="미정" />
     <select id="schedule-who-input" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
       <option value="호호">호호</option>
       <option value="수쫑쿠">수쫑쿠</option>
@@ -1265,7 +1265,15 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-function openModal(name) { document.getElementById('modal-'+name).classList.add('open'); }
+function openModal(name) {
+  document.getElementById('modal-'+name).classList.add('open');
+  if (name === 'schedule') {
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    document.getElementById('schedule-date-input').value = selectedScheduleDate || todayStr;
+    document.getElementById('schedule-time-input').value = '';
+  }
+}
 function closeModal(name) { document.getElementById('modal-'+name).classList.remove('open'); }
 
 function fmt(dateStr) {
@@ -2290,13 +2298,17 @@ function renderScheduleList(items) {
     const ai = whoOrder.indexOf(a.who||'호호');
     const bi = whoOrder.indexOf(b.who||'호호');
     if (ai !== bi) return ai - bi;
-    return (a.time||'').localeCompare(b.time||'');
+    const at = a.time || '';
+    const bt = b.time || '';
+    if (!at && bt) return -1;
+    if (at && !bt) return 1;
+    return at.localeCompare(bt);
   });
   el.innerHTML = sorted.map(i => `<div class="schedule-item ${i.who||'호호'}" id="sched-${i.id}">
     <div class="schedule-dot ${i.who||'me'}"></div>
     <div class="schedule-info">
       <div class="schedule-title">${i.title}</div>
-      <div class="schedule-meta">${i.time||''} ${i.memo?'· '+i.memo:''}</div>
+      <div class="schedule-meta">${i.time||'미정'} ${i.memo?'· '+i.memo:''}</div>
     </div>
     <span class="schedule-who-badge ${i.who||'me'}">${whoLabel[i.who]||'나'}</span>
   </div>`).join('');
