@@ -347,7 +347,30 @@
     .empty { text-align: center; padding: 40px 20px; color: var(--brown3); font-size: 13px; line-height: 1.8; }
     .empty i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--brown4); }
 
-    /* ── Toast ── */
+    /* ── Balance Game ── */
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+@keyframes heartBeat {
+  0%,100% { transform: scale(1); }
+  25% { transform: scale(1.3); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.3); }
+}
+.balance-pop { animation: popIn 0.5s ease forwards; }
+.balance-shake { animation: shake 0.5s ease; }
+.balance-heart { animation: heartBeat 0.8s ease infinite; }
+
+/* ── Toast ── */
     .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #e8849a; color: white; font-size: 12px; padding: 10px 16px; border-radius: 20px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: normal; text-align: center; width: 85%; max-width: 360px; }
     .toast.show { opacity: 1; }
 
@@ -1683,135 +1706,103 @@ const balanceQuestions = [
 ];
 
 let balanceIdx = 0;
-// Store picks per question: { 0: {호호: 'A', 수쫑쿠: 'B'}, ... }
-let balanceAllPicks = {};
+let balanceUnsubscribe = null;
 
 function initBalance() {
   balanceIdx = 0;
-  balanceAllPicks = {};
+  listenBalance();
   renderBalanceQ();
+}
+
+function listenBalance() {
+  if (balanceUnsubscribe) balanceUnsubscribe();
+  const { collection, onSnapshot, query, orderBy } = window._firebase;
+  balanceUnsubscribe = onSnapshot(
+    query(collection(window._db, 'balance'), orderBy('idx', 'asc')),
+    snap => {
+      const data = {};
+      snap.forEach(d => { data[d.data().idx] = d.data(); });
+      updateBalanceUI(data[balanceIdx]);
+    }
+  );
 }
 
 function renderBalanceQ() {
   const q = balanceQuestions[balanceIdx];
   document.getElementById('balance-num').textContent = (balanceIdx+1) + ' / ' + balanceQuestions.length;
   document.getElementById('balance-q').textContent = q.q;
-
-  ['hoho','sujonku'].forEach(who => {
-    document.getElementById(who+'-a-btn').textContent = q.a;
-    document.getElementById(who+'-b-btn').textContent = q.b;
-  });
-
-  const saved = balanceAllPicks[balanceIdx] || {};
-  const revealed = saved._revealed || false;
-
-  // Always reset button labels first
-  const q2 = balanceQuestions[balanceIdx];
-  ['hoho','sujonku'].forEach(who => {
-    const prefix = who === '호호' ? 'hoho' : 'sujonku';
-    document.getElementById(prefix+'-a-btn').textContent = q2.a;
-    document.getElementById(prefix+'-b-btn').textContent = q2.b;
-    // Reset button styles
-    ['a','b'].forEach(c => {
-      const btn = document.getElementById(prefix+'-'+c+'-btn');
-      const defaultBg = who === '호호' ? '#f5f9ff' : '#fff5f7';
-      const defaultBorder = who === '호호' ? '#ddeeff' : '#fde8ed';
-      btn.style.background = defaultBg;
-      btn.style.borderColor = defaultBorder;
-      btn.style.color = 'var(--brown1)';
-      btn.style.opacity = '1';
-    });
-  });
-
-  if (revealed) {
-    showRevealedState(saved);
-  } else {
-    document.getElementById('balance-result').style.display = 'none';
-    document.getElementById('balance-reveal-btn').style.display = 'none';
-    ['호호','수쫑쿠'].forEach(who => {
-      const prefix = who === '호호' ? 'hoho' : 'sujonku';
-      const hasPick = !!saved[who];
-      document.getElementById(prefix+'-pick-hidden').style.display = hasPick ? 'block' : 'none';
-      document.getElementById(prefix+'-pick-btns').style.display = hasPick ? 'none' : 'grid';
-    });
-    if (saved['호호'] && saved['수쫑쿠']) {
-      document.getElementById('balance-reveal-btn').style.display = 'block';
-    }
-  }
-
+  document.getElementById('hoho-a-btn').textContent = q.a;
+  document.getElementById('hoho-b-btn').textContent = q.b;
+  document.getElementById('sujonku-a-btn').textContent = q.a;
+  document.getElementById('sujonku-b-btn').textContent = q.b;
+  document.getElementById('balance-result').style.display = 'none';
+  document.getElementById('hoho-pick-hidden').style.display = 'none';
+  document.getElementById('sujonku-pick-hidden').style.display = 'none';
+  document.getElementById('hoho-pick-btns').style.display = 'grid';
+  document.getElementById('sujonku-pick-btns').style.display = 'grid';
   document.getElementById('balance-prev-btn').style.opacity = balanceIdx === 0 ? '0.3' : '1';
+  listenBalance();
 }
 
-function highlightPick(who, choice) {
-  const prefix = who === '호호' ? 'hoho' : 'sujonku';
-  const color = who === '호호' ? '#3a6ea8' : '#c04060';
-  const bg = who === '호호' ? '#ddeeff' : '#fde8ed';
-  const defaultBg = who === '호호' ? '#f5f9ff' : '#fff5f7';
-  const defaultBorder = who === '호호' ? '#ddeeff' : '#fde8ed';
+function updateBalanceUI(data) {
+  if (!data) return;
+  const q = balanceQuestions[balanceIdx];
 
-  ['a','b'].forEach(c => {
-    const btn = document.getElementById(prefix+'-'+c+'-btn');
-    if (choice && c === choice.toLowerCase()) {
-      btn.style.background = bg;
-      btn.style.borderColor = color;
-      btn.style.color = color;
-    } else {
-      btn.style.background = defaultBg;
-      btn.style.borderColor = defaultBorder;
-      btn.style.color = 'var(--brown1)';
-      btn.style.opacity = choice ? '0.5' : '1';
-    }
-  });
+  // 호호 선택 반영
+  if (data.hoho) {
+    document.getElementById('hoho-pick-btns').style.display = 'none';
+    document.getElementById('hoho-pick-hidden').style.display = 'block';
+  }
+  // 수쫑쿠 선택 반영
+  if (data.sujonku) {
+    document.getElementById('sujonku-pick-btns').style.display = 'none';
+    document.getElementById('sujonku-pick-hidden').style.display = 'block';
+  }
+  // 둘 다 선택했으면 자동 공개
+  if (data.hoho && data.sujonku) {
+    setTimeout(() => revealBalanceResult(data, q), 300);
+  }
 }
 
-function pickBalance(who, choice) {
-  if (!balanceAllPicks[balanceIdx]) balanceAllPicks[balanceIdx] = {};
-  const picks = balanceAllPicks[balanceIdx];
-  if (picks._revealed) return; // locked after reveal
-  picks[who] = choice;
+async function pickBalance(who, choice) {
+  const { collection, doc, setDoc, getDoc } = window._firebase;
+  const ref = doc(collection(window._db, 'balance'), String(balanceIdx));
+  const snap = await getDoc(ref);
+  const existing = snap.exists() ? snap.data() : {};
+  if (existing._revealed) return;
 
-  // Hide buttons, show "선택 완료"
-  const prefix = who === '호호' ? 'hoho' : 'sujonku';
+  const field = who === '호호' ? 'hoho' : 'sujonku';
+  if (existing[field]) return; // 이미 선택함
+
+  await setDoc(ref, { ...existing, idx: balanceIdx, [field]: choice }, { merge: true });
+
+  // UI 즉시 반영
+  const prefix = field;
   document.getElementById(prefix+'-pick-btns').style.display = 'none';
   document.getElementById(prefix+'-pick-hidden').style.display = 'block';
-
-  // Show reveal button if both picked
-  if (picks['호호'] && picks['수쫑쿠']) {
-    document.getElementById('balance-reveal-btn').style.display = 'block';
-  }
 }
 
-function revealBalance() {
-  const picks = balanceAllPicks[balanceIdx];
-  if (!picks || !picks['호호'] || !picks['수쫑쿠']) return;
-  picks._revealed = true;
-  showRevealedState(picks);
-}
+function revealBalanceResult(data, q) {
+  const hohoLabel = data.hoho === 'A' ? q.a : q.b;
+  const sujonkuLabel = data.sujonku === 'A' ? q.a : q.b;
+  const same = data.hoho === data.sujonku;
 
-function showRevealedState(picks) {
-  const q = balanceQuestions[balanceIdx];
-  ['hoho','sujonku'].forEach(who => {
-    const prefix = who === '호호' ? 'hoho' : 'sujonku';
-    document.getElementById(prefix+'-pick-hidden').style.display = 'none';
-    document.getElementById(prefix+'-pick-btns').style.display = 'none';
-  });
-  document.getElementById('balance-reveal-btn').style.display = 'none';
-
-  // Show result with actual picks
-  const hohoLabel = picks['호호'] === 'A' ? q.a : q.b;
-  const sujonkuLabel = picks['수쫑쿠'] === 'A' ? q.a : q.b;
   document.getElementById('balance-hoho-reveal').textContent = hohoLabel;
   document.getElementById('balance-sujonku-reveal').textContent = sujonkuLabel;
-
-  const same = picks['호호'] === picks['수쫑쿠'];
-  const el = document.getElementById('balance-result');
-  el.style.display = 'block';
   document.getElementById('balance-result-emoji').textContent = same ? '💕' : '🤣';
   document.getElementById('balance-result-text').textContent = same ? '같은 선택! 역시 찰떡궁합~' : '서로 다른 선택! 취향 차이 발견~';
-}
 
-function showBalanceResult(pickHoho, pickSujonku) {
-  // kept for compatibility
+  const el = document.getElementById('balance-result');
+  el.style.display = 'block';
+  el.classList.remove('balance-pop', 'balance-shake', 'balance-heart');
+  void el.offsetWidth;
+
+  if (same) {
+    el.classList.add('balance-pop');
+    document.getElementById('balance-result-emoji').classList.add('balance-heart');
+  } else {
+    el.classList.add('balance-shake');
+  }
 }
 
 function prevBalance() {
@@ -1831,7 +1822,6 @@ function nextBalance() {
 
 function resetBalance() {
   balanceIdx = 0;
-  balanceAllPicks = {};
   renderBalanceQ();
 }
 
