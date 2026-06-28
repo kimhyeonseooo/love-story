@@ -2280,7 +2280,7 @@ function renderScheduleList(items) {
   const el = document.getElementById('schedule-list');
   if (!items.length) { el.innerHTML = '<div style="font-size:12px;color:var(--brown3);text-align:center;padding:12px;">일정이 없어요</div>'; return; }
   const whoLabel = { 호호:'호호', 수쫑쿠:'수쫑쿠', both:'우리 함께' };
-  el.innerHTML = items.sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map(i => `<div class="schedule-item" id="sched-${i.id}">
+  el.innerHTML = items.sort((a,b)=>(a.time||'').localeCompare(b.time||'')).map(i => `<div class="schedule-item ${i.who||'me'}" id="sched-${i.id}">
     <div class="schedule-dot ${i.who||'me'}"></div>
     <div class="schedule-info">
       <div class="schedule-title">${i.title}</div>
