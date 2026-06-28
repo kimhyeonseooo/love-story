@@ -2296,11 +2296,17 @@ async function saveSchedule() {
   const time = document.getElementById('schedule-time-input').value;
   const who = document.getElementById('schedule-who-input').value;
   const memo = document.getElementById('schedule-memo-input').value.trim();
-  const { collection, addDoc } = window._firebase;
-  await addDoc(collection(window._db, 'schedules'), { title, date, time, who, memo, createdAt: new Date().toISOString() });
-  ['schedule-title-input','schedule-time-input','schedule-memo-input'].forEach(id => document.getElementById(id).value='');
-  closeModal('schedule');
-  toast('일정이 추가됐어요 📅');
+  try {
+    const { collection, addDoc } = window._firebase;
+    await addDoc(collection(window._db, 'schedules'), { title, date, time, who, memo, createdAt: new Date().toISOString() });
+    ['schedule-title-input','schedule-time-input','schedule-memo-input'].forEach(id => document.getElementById(id).value='');
+    closeModal('schedule');
+    toast('일정이 추가됐어요 📅');
+    selectScheduleDate(date);
+  } catch(e) {
+    console.error('일정 저장 오류:', e);
+    toast('저장 중 오류가 발생했어요 😢');
+  }
 }
 
 // ── Travel ──
