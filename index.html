@@ -1248,6 +1248,11 @@ function switchUs(type, btn) {
   document.querySelectorAll('#section-us .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if (type === 'stats') updateStats();
+  if (type === 'schedule') {
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    selectScheduleDate(todayStr);
+  }
 }
 
 function toast(msg) {
