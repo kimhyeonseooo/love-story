@@ -752,16 +752,16 @@
     <!-- 🎲 호호 -->
     <div class="section" id="section-hoho" style="display:none;">
       <div class="pill-tabs" id="hoho-tabs" style="justify-content:center;">
-        <button class="ptab active" onclick="switchHoho('today',this)">🎲 뭐하지</button>
+        <button class="ptab active" onclick="switchHoho('dream',this)">✈️ 드림</button>
         <button class="ptab" onclick="switchHoho('question',this)">💬 질문</button>
         <button class="ptab" onclick="switchHoho('balance',this)">⚖️ 밸런스</button>
         <button class="ptab" onclick="switchHoho('mission',this)">🎯 미션</button>
         <button class="ptab" onclick="switchHoho('roulette',this)">🎰 룰렛</button>
-        <button class="ptab" onclick="switchHoho('dream',this)">✈️ 드림</button>
+        <button class="ptab" onclick="switchHoho('today',this)">🎲 뭐하지</button>
       </div>
 
       <!-- 뭐하지 -->
-      <div id="hoho-today">
+      <div id="hoho-today" style="display:none;">
         <div style="text-align:center;padding:4px 0 8px;">
           <div style="font-size:13px;color:var(--brown3);">오늘 뭐할지 모르겠을 때!</div>
         </div>
@@ -890,7 +890,7 @@
       </div>
 
       <!-- ✈️ 드림 -->
-      <div id="hoho-dream" style="display:none;">
+      <div id="hoho-dream">
         <div style="text-align:center;padding:4px 0 8px;">
           <div style="font-size:18px;font-weight:700;color:var(--brown1);font-family:'Gaegu',cursive;">수쫑쿠의 드림 ✈️</div>
           <div style="font-size:12px;color:var(--brown3);margin-top:2px;">꿈을 이룬 수쫑쿠의 모습 🥺❤️</div>
@@ -1590,6 +1590,7 @@ function switchHoho(type, btn) {
   if (type === 'question') updateHohoQuestion();
   if (type === 'dream') setDreamAirline('korean');
   if (type === 'balance') initBalance();
+  if (type === 'today') initToday && initToday();
 }
 
 function updateHohoQuestion() {
@@ -1703,6 +1704,26 @@ const balanceQuestions = [
   { q: "🐶 반려동물 키운다면?", a: "🐶 강아지", b: "🐱 고양이" },
   { q: "✈️ 여행 스타일은?", a: "📋 꼼꼼하게 계획", b: "🎲 즉흥적으로" },
   { q: "💑 10년 후 우리는?", a: "🏡 조용한 시골집", b: "🌆 도시 아파트" },
+  { q: "🍣 외식 뭐 먹을래?", a: "🍣 일식", b: "🥩 고기" },
+  { q: "😴 잠자리 스타일은?", a: "🌡️ 따뜻하게", b: "❄️ 시원하게" },
+  { q: "📸 사진 찍을 때?", a: "🤳 셀카 고수", b: "📷 찍어주는 게 좋아" },
+  { q: "🎵 드라이브할 때 음악은?", a: "🎤 신나는 팝", b: "🎸 잔잔한 발라드" },
+  { q: "💌 연락 스타일은?", a: "📞 전화 통화", b: "💬 카톡 문자" },
+  { q: "🌧️ 비 오는 날엔?", a: "🏠 집에서 영화", b: "☔ 비 맞으며 산책" },
+  { q: "🍰 케이크 고른다면?", a: "🍓 딸기 케이크", b: "🍫 초코 케이크" },
+  { q: "🛒 마트 가면?", a: "📝 리스트대로만", b: "🛒 보이는 거 다 담기" },
+  { q: "🎢 놀이공원에서?", a: "🎢 무서운 놀이기구", b: "🎠 귀여운 놀이기구" },
+  { q: "🌅 아침형 vs 저녁형?", a: "🌅 일찍 일어나기", b: "🌙 늦게까지 깨있기" },
+  { q: "💆 스트레스 해소법은?", a: "🏃 운동하기", b: "🛁 목욕하고 쉬기" },
+  { q: "🍔 패스트푸드 고른다면?", a: "🍔 맥도날드", b: "🍗 KFC" },
+  { q: "📺 같이 볼 영상은?", a: "🎬 영화", b: "📺 예능/드라마" },
+  { q: "🎯 게임 한다면?", a: "🎮 같이 협동 게임", b: "⚔️ 대결 게임" },
+  { q: "💸 용돈 생기면?", a: "💰 저축", b: "🛍️ 바로 쓰기" },
+  { q: "🏋️ 운동한다면?", a: "🏋️ 헬스장", b: "🧘 요가/필라테스" },
+  { q: "🍜 라면 먹을 때?", a: "🥚 계란 꼭 넣어야", b: "🍜 그냥 라면만" },
+  { q: "📚 책 읽는다면?", a: "📖 종이책", b: "📱 전자책" },
+  { q: "🌍 살고 싶은 나라는?", a: "🗼 유럽", b: "🗽 미국" },
+  { q: "🎂 생일 파티 스타일은?", a: "🎉 친구들과 파티", b: "🥂 둘이서 조용히" },
 ];
 
 let balanceIdx = 0;
