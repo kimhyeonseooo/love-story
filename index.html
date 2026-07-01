@@ -358,7 +358,18 @@
     .empty { text-align: center; padding: 40px 20px; color: var(--brown3); font-size: 13px; line-height: 1.8; }
     .empty i { font-size: 40px; display: block; margin-bottom: 10px; color: var(--brown4); }
 
-    /* ── Balance Game ── */
+    /* ── Comments ── */
+  .comment-section { margin-top: 8px; border-top: 0.5px solid var(--cream5); padding-top: 8px; }
+  .comment-item { display:flex; gap:6px; margin-bottom:6px; align-items:flex-start; }
+  .comment-who { font-size:10px; font-weight:700; color:var(--brown3); flex-shrink:0; padding-top:2px; }
+  .comment-text { font-size:12px; color:var(--brown1); line-height:1.5; flex:1; }
+  .comment-date { font-size:10px; color:var(--brown4); margin-left:4px; }
+  .comment-input-row { display:flex; gap:6px; margin-top:6px; align-items:center; }
+  .comment-input { flex:1; background:var(--cream4); border:0.5px solid var(--cream5); border-radius:20px; padding:6px 12px; font-size:12px; color:var(--brown1); font-family:inherit; outline:none; }
+  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 12px; font-size:11px; font-family:inherit; cursor:pointer; flex-shrink:0; }
+  .comment-toggle { font-size:11px; color:var(--brown3); cursor:pointer; margin-top:4px; display:inline-block; }
+
+/* ── Balance Game ── */
 @keyframes popIn {
   0% { transform: scale(0.5); opacity: 0; }
   70% { transform: scale(1.1); }
@@ -1882,6 +1893,57 @@ function setDreamAirline(key) {
   }
 }
 
+// ── Comments ──
+const _commentListeners = {};
+
+function renderComments(parentCol, parentId, el) {
+  if (_commentListeners[parentId]) _commentListeners[parentId]();
+  const { collection, onSnapshot, orderBy, query } = window._firebase;
+  const unsub = onSnapshot(
+    query(collection(window._db, `${parentCol}/${parentId}/comments`), orderBy('date', 'asc')),
+    snap => {
+      const items = snap.docs.map(d => ({id:d.id,...d.data()}));
+      const list = el.querySelector('.comment-list');
+      if (!list) return;
+      if (!items.length) {
+        list.innerHTML = '<div style="font-size:11px;color:var(--brown4);">첫 댓글을 달아보세요 💬</div>';
+        return;
+      }
+      list.innerHTML = items.map(i => `<div class="comment-item">
+        <span class="comment-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who}</span>
+        <span class="comment-text">${i.text}<span class="comment-date">${fmt(i.date)}</span></span>
+      </div>`).join('');
+    }
+  );
+  _commentListeners[parentId] = unsub;
+}
+
+async function submitComment(parentCol, parentId, inputEl, who) {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  const { collection, addDoc } = window._firebase;
+  await addDoc(collection(window._db, `${parentCol}/${parentId}/comments`), {
+    text, who, date: new Date().toISOString()
+  });
+  inputEl.value = '';
+}
+
+function addCommentSection(cardEl, col, id) {
+  const section = document.createElement('div');
+  section.className = 'comment-section';
+  section.innerHTML = `
+    <div class="comment-list"></div>
+    <div class="comment-input-row">
+      <select class="who-select" id="cmt-who-${id}" style="font-size:11px;padding:4px 6px;border-radius:20px;background:var(--cream4);border:0.5px solid var(--cream5);color:var(--brown2);font-family:inherit;outline:none;">
+        <option>호호</option><option>수쫑쿠</option>
+      </select>
+      <input class="comment-input" id="cmt-input-${id}" placeholder="댓글 달기..." />
+      <button class="comment-submit" onclick="submitComment('${col}','${id}',document.getElementById('cmt-input-${id}'),document.getElementById('cmt-who-${id}').value)">↑</button>
+    </div>`;
+  cardEl.appendChild(section);
+  renderComments(col, id, section);
+}
+
 // ── Balance Game ──
 const balanceQuestions = [
   { q: "🌊 여름 휴가 어디로?", a: "🏖️ 바다", b: "🏔️ 산" },
@@ -2411,6 +2473,10 @@ function renderDiaryList(items) {
       <button class="sched-btn del" onclick="deleteDiary('${i.id}')">🗑️ 삭제</button>
     </div>
   </div>`).join('');
+  items.forEach(i => {
+    const cardEl = document.getElementById('diary-' + i.id);
+    if (cardEl) addCommentSection(cardEl, 'diary', i.id);
+  });
 }
 
 // ── Schedule Calendar ──
@@ -3696,7 +3762,10 @@ window.addEventListener('firebase-ready', () => {
     </div>`).join('');
     items.forEach(i => {
       const el2 = document.getElementById('tmi-'+i.id);
-      if (el2) el2.addEventListener('click', () => showAction('tmis', i.id, i.text.slice(0,15), i));
+      if (el2) {
+        el2.querySelector('.sched-action-row') && el2.querySelector('.sched-btn.edit') && el2.querySelector('.sched-btn.edit').addEventListener('click', e => { e.stopPropagation(); showAction('tmis', i.id, i.text.slice(0,15), i); });
+        addCommentSection(el2, 'tmis', i.id);
+      }
     });
   });
 
@@ -3713,7 +3782,10 @@ window.addEventListener('firebase-ready', () => {
     </div>`).join('');
     items.forEach(i => {
       const el2 = document.getElementById('worry-'+i.id);
-      if (el2) el2.addEventListener('click', () => showAction('worries', i.id, i.text.slice(0,15), i));
+      if (el2) {
+        el2.querySelector('.sched-action-row') && el2.querySelector('.sched-btn.edit') && el2.querySelector('.sched-btn.edit').addEventListener('click', e => { e.stopPropagation(); showAction('worries', i.id, i.text.slice(0,15), i); });
+        addCommentSection(el2, 'worries', i.id);
+      }
     });
   });
 
@@ -3731,7 +3803,10 @@ window.addEventListener('firebase-ready', () => {
     </div>`).join('');
     items.forEach(i => {
       const el2 = document.getElementById('sulk-'+i.id);
-      if (el2) el2.addEventListener('click', () => showAction('sulks', i.id, i.text.slice(0,15), i));
+      if (el2) {
+        el2.querySelector('.sched-action-row') && el2.querySelector('.sched-btn.edit') && el2.querySelector('.sched-btn.edit').addEventListener('click', e => { e.stopPropagation(); showAction('sulks', i.id, i.text.slice(0,15), i); });
+        addCommentSection(el2, 'sulks', i.id);
+      }
     });
   });
 
