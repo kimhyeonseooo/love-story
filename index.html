@@ -366,7 +366,7 @@
   .comment-date { font-size:10px; color:var(--brown4); margin-left:4px; }
   .comment-input-row { display:flex; gap:6px; margin-top:6px; align-items:center; }
   .comment-input { flex:1; background:var(--cream4); border:0.5px solid var(--cream5); border-radius:20px; padding:6px 12px; font-size:12px; color:var(--brown1); font-family:inherit; outline:none; }
-  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 12px; font-size:11px; font-family:inherit; cursor:pointer; flex-shrink:0; }
+  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 14px; font-size:12px; font-family:inherit; cursor:pointer; flex-shrink:0; font-weight:600; }
   .comment-toggle { font-size:11px; color:var(--brown3); cursor:pointer; margin-top:4px; display:inline-block; }
 
 /* ── Balance Game ── */
@@ -1909,10 +1909,14 @@ function renderComments(parentCol, parentId, el) {
         list.innerHTML = '<div style="font-size:11px;color:var(--brown4);">첫 댓글을 달아보세요 💬</div>';
         return;
       }
-      list.innerHTML = items.map(i => `<div class="comment-item">
+      list.innerHTML = items.map(i => `<div class="comment-item" id="cmt-card-${i.id}" style="cursor:pointer;">
         <span class="comment-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who}</span>
         <span class="comment-text">${i.text}<span class="comment-date">${fmt(i.date)}</span></span>
       </div>`).join('');
+      items.forEach(i => {
+        const cEl = list.querySelector('#cmt-card-' + i.id);
+        if (cEl) cEl.addEventListener('click', () => showCommentAction(parentCol, parentId, i));
+      });
     }
   );
   _commentListeners[parentId] = unsub;
@@ -1938,7 +1942,7 @@ function addCommentSection(cardEl, col, id) {
         <option>호호</option><option>수쫑쿠</option>
       </select>
       <input class="comment-input" id="cmt-input-${id}" placeholder="댓글 달기..." />
-      <button class="comment-submit" onclick="submitComment('${col}','${id}',document.getElementById('cmt-input-${id}'),document.getElementById('cmt-who-${id}').value)">↑</button>
+      <button class="comment-submit" onclick="submitComment('${col}','${id}',document.getElementById('cmt-input-${id}'),document.getElementById('cmt-who-${id}').value)">등록</button>
     </div>`;
   cardEl.appendChild(section);
   renderComments(col, id, section);
