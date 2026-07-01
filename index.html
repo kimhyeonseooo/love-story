@@ -1918,6 +1918,7 @@ function renderComments(parentCol, parentId, el) {
         items.forEach(i => {
           const div = document.createElement('div');
           div.className = 'comment-item';
+          div.id = 'cmt-card-' + i.id;
           div.style.cursor = 'pointer';
 
           const who = document.createElement('span');
