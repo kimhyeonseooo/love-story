@@ -366,7 +366,7 @@
   .comment-date { font-size:10px; color:var(--brown4); margin-left:4px; }
   .comment-input-row { display:flex; gap:6px; margin-top:6px; align-items:center; width:100%; box-sizing:border-box; }
   .comment-input { min-width:0; flex:1; background:var(--cream4); border:0.5px solid var(--cream5); border-radius:20px; padding:6px 10px; font-size:12px; color:var(--brown1); font-family:inherit; outline:none; box-sizing:border-box; }
-  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 10px; font-size:11px; font-family:inherit; cursor:pointer; flex-shrink:0; font-weight:600; white-space:nowrap; }
+  .comment-submit { background:#e8849a; color:white; border:none; border-radius:20px; padding:6px 12px; font-size:12px; font-family:inherit; cursor:pointer; flex-shrink:0; font-weight:700; white-space:nowrap; min-width:40px; }
   .comment-toggle { font-size:11px; color:var(--brown3); cursor:pointer; margin-top:4px; display:inline-block; }
 
 /* ── Balance Game ── */
@@ -2033,6 +2033,7 @@ function addCommentSection(cardEl, col, id) {
   const btn = document.createElement('button');
   btn.className = 'comment-submit';
   btn.textContent = '등록';
+  btn.style.cssText = 'background:#e8849a;color:white;border:none;border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;flex-shrink:0;font-weight:700;white-space:nowrap;';
   btn.addEventListener('click', () => submitComment(col, id, input, whoSel.value));
 
   // 엔터키로도 등록
