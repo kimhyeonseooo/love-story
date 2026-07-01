@@ -1965,8 +1965,45 @@ function showCommentAction(col, parentId, item) {
   editBtn.style.cssText = 'display:block;width:100%;padding:13px;background:var(--cream4);border:none;border-radius:10px;font-size:14px;color:var(--brown1);font-family:inherit;cursor:pointer;margin-bottom:8px;';
   editBtn.addEventListener('click', () => {
     sheet.remove();
-    const newText = prompt('댓글 수정:', item.text);
-    if (newText && newText.trim()) updateComment(col, parentId, item.id, newText.trim());
+    const cmtEl = document.getElementById('cmt-card-' + item.id);
+    if (!cmtEl) return;
+    cmtEl.innerHTML = '';
+    const editRow = document.createElement('div');
+    editRow.style.cssText = 'display:flex;gap:6px;align-items:center;width:100%;';
+    const editInput = document.createElement('input');
+    editInput.value = item.text;
+    editInput.style.cssText = 'flex:1;min-width:0;background:var(--cream4);border:0.5px solid #e8849a;border-radius:20px;padding:5px 10px;font-size:12px;color:var(--brown1);font-family:inherit;outline:none;';
+    const saveBtn2 = document.createElement('button');
+    saveBtn2.textContent = '저장';
+    saveBtn2.style.cssText = 'background:#e8849a;color:white;border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;flex-shrink:0;font-weight:700;';
+    saveBtn2.addEventListener('click', () => {
+      if (editInput.value.trim()) updateComment(col, parentId, item.id, editInput.value.trim());
+    });
+    const cancelBtn2 = document.createElement('button');
+    cancelBtn2.textContent = '취소';
+    cancelBtn2.style.cssText = 'background:var(--cream4);color:var(--brown3);border:none;border-radius:20px;padding:5px 10px;font-size:11px;font-family:inherit;cursor:pointer;flex-shrink:0;';
+    cancelBtn2.addEventListener('click', () => {
+      cmtEl.innerHTML = '';
+      const w = document.createElement('span');
+      w.className = 'comment-who ' + (item.who==='수쫑쿠'?'sujonku':'hoho');
+      w.textContent = item.who;
+      const t = document.createElement('span');
+      t.className = 'comment-text';
+      t.textContent = item.text + ' ';
+      const d = document.createElement('span');
+      d.className = 'comment-date';
+      d.textContent = fmt(item.date);
+      t.appendChild(d);
+      cmtEl.appendChild(w);
+      cmtEl.appendChild(t);
+      cmtEl.style.cursor = 'pointer';
+      cmtEl.onclick = () => showCommentAction(col, parentId, item);
+    });
+    editRow.appendChild(editInput);
+    editRow.appendChild(saveBtn2);
+    editRow.appendChild(cancelBtn2);
+    cmtEl.appendChild(editRow);
+    editInput.focus();
   });
 
   const delBtn = document.createElement('button');
