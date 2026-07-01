@@ -364,9 +364,9 @@
   .comment-who { font-size:10px; font-weight:700; color:var(--brown3); flex-shrink:0; padding-top:2px; }
   .comment-text { font-size:12px; color:var(--brown1); line-height:1.5; flex:1; }
   .comment-date { font-size:10px; color:var(--brown4); margin-left:4px; }
-  .comment-input-row { display:flex; gap:6px; margin-top:6px; align-items:center; }
-  .comment-input { flex:1; background:var(--cream4); border:0.5px solid var(--cream5); border-radius:20px; padding:6px 12px; font-size:12px; color:var(--brown1); font-family:inherit; outline:none; }
-  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 14px; font-size:12px; font-family:inherit; cursor:pointer; flex-shrink:0; font-weight:600; }
+  .comment-input-row { display:flex; gap:6px; margin-top:6px; align-items:center; width:100%; box-sizing:border-box; }
+  .comment-input { min-width:0; flex:1; background:var(--cream4); border:0.5px solid var(--cream5); border-radius:20px; padding:6px 10px; font-size:12px; color:var(--brown1); font-family:inherit; outline:none; box-sizing:border-box; }
+  .comment-submit { background:var(--pink1); color:white; border:none; border-radius:20px; padding:6px 10px; font-size:11px; font-family:inherit; cursor:pointer; flex-shrink:0; font-weight:600; white-space:nowrap; }
   .comment-toggle { font-size:11px; color:var(--brown3); cursor:pointer; margin-top:4px; display:inline-block; }
 
 /* ── Balance Game ── */
@@ -1938,7 +1938,7 @@ function addCommentSection(cardEl, col, id) {
   section.innerHTML = `
     <div class="comment-list"></div>
     <div class="comment-input-row">
-      <select class="who-select" id="cmt-who-${id}" style="font-size:11px;padding:4px 6px;border-radius:20px;background:var(--cream4);border:0.5px solid var(--cream5);color:var(--brown2);font-family:inherit;outline:none;">
+      <select class="who-select" id="cmt-who-${id}" style="font-size:11px;padding:4px 4px;border-radius:20px;background:var(--cream4);border:0.5px solid var(--cream5);color:var(--brown2);font-family:inherit;outline:none;flex-shrink:0;max-width:60px;">
         <option>호호</option><option>수쫑쿠</option>
       </select>
       <input class="comment-input" id="cmt-input-${id}" placeholder="댓글 달기..." />
