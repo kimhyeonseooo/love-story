@@ -1922,6 +1922,55 @@ function renderComments(parentCol, parentId, el) {
   _commentListeners[parentId] = unsub;
 }
 
+function showCommentAction(col, parentId, item) {
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:white;border-radius:16px 16px 0 0;padding:20px 16px;z-index:9999;box-shadow:0 -4px 20px rgba(0,0,0,0.15);';
+
+  const preview = document.createElement('div');
+  preview.style.cssText = 'font-size:13px;color:var(--brown3);margin-bottom:14px;text-align:center;';
+  preview.textContent = '"' + item.text.slice(0,25) + (item.text.length > 25 ? '...' : '') + '"';
+
+  const editBtn = document.createElement('button');
+  editBtn.textContent = '✏️ 수정하기';
+  editBtn.style.cssText = 'display:block;width:100%;padding:13px;background:var(--cream4);border:none;border-radius:10px;font-size:14px;color:var(--brown1);font-family:inherit;cursor:pointer;margin-bottom:8px;';
+  editBtn.addEventListener('click', () => {
+    sheet.remove();
+    const newText = prompt('댓글 수정:', item.text);
+    if (newText && newText.trim()) updateComment(col, parentId, item.id, newText.trim());
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.textContent = '🗑️ 삭제하기';
+  delBtn.style.cssText = 'display:block;width:100%;padding:13px;background:#fde8e8;border:none;border-radius:10px;font-size:14px;color:#c0392b;font-family:inherit;cursor:pointer;margin-bottom:8px;';
+  delBtn.addEventListener('click', () => {
+    sheet.remove();
+    if (confirm('댓글을 삭제할까요?')) deleteComment(col, parentId, item.id);
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = '취소';
+  cancelBtn.style.cssText = 'display:block;width:100%;padding:13px;background:none;border:none;font-size:14px;color:var(--brown3);font-family:inherit;cursor:pointer;';
+  cancelBtn.addEventListener('click', () => sheet.remove());
+
+  sheet.appendChild(preview);
+  sheet.appendChild(editBtn);
+  sheet.appendChild(delBtn);
+  sheet.appendChild(cancelBtn);
+  document.body.appendChild(sheet);
+}
+
+async function updateComment(col, parentId, commentId, text) {
+  const { doc, updateDoc } = window._firebase;
+  await updateDoc(doc(window._db, col + '/' + parentId + '/comments', commentId), { text });
+  toast('댓글이 수정됐어요 ✏️');
+}
+
+async function deleteComment(col, parentId, commentId) {
+  const { doc, deleteDoc } = window._firebase;
+  await deleteDoc(doc(window._db, col + '/' + parentId + '/comments', commentId));
+  toast('댓글이 삭제됐어요 🗑️');
+}
+
 async function submitComment(parentCol, parentId, inputEl, who) {
   const text = inputEl.value.trim();
   if (!text) return;
@@ -1935,15 +1984,36 @@ async function submitComment(parentCol, parentId, inputEl, who) {
 function addCommentSection(cardEl, col, id) {
   const section = document.createElement('div');
   section.className = 'comment-section';
-  section.innerHTML = `
-    <div class="comment-list"></div>
-    <div class="comment-input-row">
-      <select class="who-select" id="cmt-who-${id}" style="font-size:11px;padding:4px 4px;border-radius:20px;background:var(--cream4);border:0.5px solid var(--cream5);color:var(--brown2);font-family:inherit;outline:none;flex-shrink:0;max-width:60px;">
-        <option>호호</option><option>수쫑쿠</option>
-      </select>
-      <input class="comment-input" id="cmt-input-${id}" placeholder="댓글 달기..." />
-      <button class="comment-submit" onclick="submitComment('${col}','${id}',document.getElementById('cmt-input-${id}'),document.getElementById('cmt-who-${id}').value)">등록</button>
-    </div>`;
+
+  const list = document.createElement('div');
+  list.className = 'comment-list';
+
+  const inputRow = document.createElement('div');
+  inputRow.className = 'comment-input-row';
+
+  const whoSel = document.createElement('select');
+  whoSel.className = 'who-select';
+  whoSel.style.cssText = 'font-size:11px;padding:4px;border-radius:20px;background:var(--cream4);border:0.5px solid var(--cream5);color:var(--brown2);font-family:inherit;outline:none;flex-shrink:0;width:60px;';
+  whoSel.innerHTML = '<option>호호</option><option>수쫑쿠</option>';
+
+  const input = document.createElement('input');
+  input.className = 'comment-input';
+  input.placeholder = '댓글 달기...';
+
+  const btn = document.createElement('button');
+  btn.className = 'comment-submit';
+  btn.textContent = '등록';
+  btn.addEventListener('click', () => submitComment(col, id, input, whoSel.value));
+
+  // 엔터키로도 등록
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submitComment(col, id, input, whoSel.value); });
+
+  inputRow.appendChild(whoSel);
+  inputRow.appendChild(input);
+  inputRow.appendChild(btn);
+
+  section.appendChild(list);
+  section.appendChild(inputRow);
   cardEl.appendChild(section);
   renderComments(col, id, section);
 }
