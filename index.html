@@ -1898,28 +1898,58 @@ const _commentListeners = {};
 
 function renderComments(parentCol, parentId, el) {
   if (_commentListeners[parentId]) _commentListeners[parentId]();
-  const { collection, onSnapshot, orderBy, query } = window._firebase;
-  const unsub = onSnapshot(
-    query(collection(window._db, `${parentCol}/${parentId}/comments`), orderBy('date', 'asc')),
-    snap => {
-      const items = snap.docs.map(d => ({id:d.id,...d.data()}));
-      const list = el.querySelector('.comment-list');
-      if (!list) return;
-      if (!items.length) {
-        list.innerHTML = '<div style="font-size:11px;color:var(--brown4);">첫 댓글을 달아보세요 💬</div>';
-        return;
+
+  function doRender() {
+    const { collection, onSnapshot, orderBy, query } = window._firebase;
+    const unsub = onSnapshot(
+      query(collection(window._db, parentCol + '/' + parentId + '/comments'), orderBy('date', 'asc')),
+      snap => {
+        const items = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        const list = el.querySelector('.comment-list');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!items.length) {
+          const empty = document.createElement('div');
+          empty.style.cssText = 'font-size:11px;color:var(--brown4);padding:4px 0;';
+          empty.textContent = '첫 댓글을 달아보세요 💬';
+          list.appendChild(empty);
+          return;
+        }
+        items.forEach(i => {
+          const div = document.createElement('div');
+          div.className = 'comment-item';
+          div.style.cursor = 'pointer';
+
+          const who = document.createElement('span');
+          who.className = 'comment-who ' + (i.who === '수쫑쿠' ? 'sujonku' : 'hoho');
+          who.textContent = i.who;
+
+          const text = document.createElement('span');
+          text.className = 'comment-text';
+          text.textContent = i.text + ' ';
+
+          const date = document.createElement('span');
+          date.className = 'comment-date';
+          date.textContent = fmt(i.date);
+          text.appendChild(date);
+
+          div.appendChild(who);
+          div.appendChild(text);
+          div.addEventListener('click', () => showCommentAction(parentCol, parentId, i));
+          list.appendChild(div);
+        });
       }
-      list.innerHTML = items.map(i => `<div class="comment-item" id="cmt-card-${i.id}" style="cursor:pointer;">
-        <span class="comment-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who}</span>
-        <span class="comment-text">${i.text}<span class="comment-date">${fmt(i.date)}</span></span>
-      </div>`).join('');
-      items.forEach(i => {
-        const cEl = list.querySelector('#cmt-card-' + i.id);
-        if (cEl) cEl.addEventListener('click', () => showCommentAction(parentCol, parentId, i));
-      });
-    }
-  );
-  _commentListeners[parentId] = unsub;
+    );
+    _commentListeners[parentId] = unsub;
+  }
+
+  if (window._firebase && window._db) {
+    doRender();
+  } else {
+    const check = setInterval(() => {
+      if (window._firebase && window._db) { clearInterval(check); doRender(); }
+    }, 200);
+  }
 }
 
 function showCommentAction(col, parentId, item) {
