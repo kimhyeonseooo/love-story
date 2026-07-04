@@ -509,6 +509,7 @@
         <button class="ptab active" onclick="switchRecord('diary',this)">일기</button>
         <button class="ptab" onclick="switchRecord('datelog',this)">💝 데이트로그</button>
         <button class="ptab" onclick="switchRecord('tmi',this)">💬 TMI</button>
+        <button class="ptab" onclick="switchRecord('word',this)">💭 한마디</button>
         <button class="ptab" onclick="switchRecord('worry',this)">고민</button>
         <button class="ptab" onclick="switchRecord('sulk',this)">서운핑</button>
         <button class="ptab" onclick="switchRecord('letters',this)">편지함</button>
@@ -570,6 +571,24 @@
             <button class="submit-btn" onclick="saveTmi()">공유하기</button>
           </div>
         </div>
+      </div>
+
+      <!-- 한마디 -->
+      <div id="record-word" style="display:none;">
+        <div class="sec-title"><i class="ti ti-message-heart"></i> 오늘의 한마디 💭</div>
+        <div style="font-size:12px;color:var(--brown3);margin-bottom:12px;">매일 서로에게 한마디씩 남겨요 🤍 홈 화면과 자동으로 연동돼요!</div>
+        <div class="home-today" style="margin-bottom:16px;">
+          <div style="margin-bottom:6px;">
+            <div style="font-size:10px;color:var(--brown3);margin-bottom:3px;">호호</div>
+            <div id="record-word-oppa" onclick="openTodayWordModal('호호')" style="font-size:13px;color:var(--brown1);background:var(--cream4);border-radius:10px;padding:8px 10px;min-height:34px;-webkit-user-select:none;user-select:none;cursor:pointer;">오늘의 한마디를 작성해주세요!</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--brown3);margin-bottom:3px;">수쫑쿠</div>
+            <div id="record-word-sujonku" onclick="openTodayWordModal('수쫑쿠')" style="font-size:13px;color:var(--brown1);background:#fff0f3;border-radius:10px;padding:8px 10px;min-height:34px;-webkit-user-select:none;user-select:none;cursor:pointer;">오늘의 한마디를 작성해주세요!</div>
+          </div>
+        </div>
+        <div class="sec-title" style="font-size:14px;"><i class="ti ti-history"></i> 지난 한마디</div>
+        <div id="word-history-list"></div>
       </div>
 
       <div id="record-worry" style="display:none;">
@@ -675,6 +694,7 @@
     <div class="section" id="section-us" style="display:none;">
       <div class="pill-tabs">
         <button class="ptab active" onclick="switchUs('schedule',this)">📅 일정</button>
+        <button class="ptab" onclick="switchUs('todo',this)">✅ 할일</button>
         <button class="ptab" onclick="switchUs('anni',this)">D-day</button>
         <button class="ptab" onclick="switchUs('cost',this)">가계부</button>
         <button class="ptab" onclick="switchUs('bucket',this)">버킷리스트</button>
@@ -696,6 +716,17 @@
         <div id="schedule-selected-date" style="font-size:13px;font-weight:600;color:var(--brown1);margin-bottom:8px;display:none;"></div>
         <div id="schedule-list"></div>
         <button class="add-btn" onclick="openModal('schedule')"><i class="ti ti-plus"></i> 일정 추가하기</button>
+      </div>
+
+      <!-- 할일 -->
+      <div id="us-todo" style="display:none;">
+        <div class="sec-title"><i class="ti ti-checklist"></i> 할일 ✅</div>
+        <div class="pill-tabs" style="margin-bottom:12px;">
+          <button class="ptab active" id="todo-tab-todo" onclick="filterTodo('todo',this)">🌟 진행중</button>
+          <button class="ptab" id="todo-tab-done" onclick="filterTodo('done',this)">✅ 완료</button>
+        </div>
+        <div id="todo-list"></div>
+        <button class="add-btn" onclick="openModal('todo')"><i class="ti ti-plus"></i> 할일 추가하기</button>
       </div>
 
       <!-- 버킷리스트 -->
@@ -1183,6 +1214,32 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="modal-todo">
+  <div class="modal"><h3>✅ 할일 추가</h3>
+    <input type="text" id="todo-text" placeholder="해야 할 일" />
+    <select id="todo-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
+      <option value="호호">호호</option><option value="수쫑쿠">수쫑쿠</option><option value="both">우리 함께</option>
+    </select>
+    <div class="modal-btns"><button class="modal-cancel" onclick="closeModal('todo')">취소</button><button class="modal-save" onclick="saveTodo()">추가하기</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-edit-todo">
+  <div class="modal">
+    <div class="modal-title">할일 수정 ✏️</div>
+    <input type="text" id="edit-todo-text" placeholder="내용" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;" />
+    <select id="edit-todo-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
+      <option value="호호">호호</option>
+      <option value="수쫑쿠">수쫑쿠</option>
+      <option value="both">우리 함께</option>
+    </select>
+    <div style="display:flex;gap:8px;">
+      <button class="modal-cancel" onclick="closeModal('edit-todo')">취소</button>
+      <button class="modal-save" onclick="updateTodo()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-cost">
   <div class="modal"><h3>💰 지출 추가</h3>
     <input type="text" id="cost-title-input" placeholder="내용 (예: 영화, 삼겹살)" />
@@ -1398,7 +1455,7 @@ function refreshHomePhotos() {
 }
 
 function switchRecord(type, btn) {
-  ['diary','datelog','tmi','worry','sulk','letters','capsule','about'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
+  ['diary','datelog','tmi','word','worry','sulk','letters','capsule','about'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
   if (type === 'about') loadAllAbout();
   document.getElementById('record-'+type).style.display = 'block';
   document.querySelectorAll('#section-record .ptab').forEach(b => b.classList.remove('active'));
@@ -1406,7 +1463,7 @@ function switchRecord(type, btn) {
 }
 
 function switchUs(type, btn) {
-  ['schedule','anni','cost','bucket','wish','travel','stats'].forEach(t => document.getElementById('us-'+t).style.display = 'none');
+  ['schedule','todo','anni','cost','bucket','wish','travel','stats'].forEach(t => document.getElementById('us-'+t).style.display = 'none');
   document.getElementById('us-'+type).style.display = 'block';
   document.querySelectorAll('#section-us .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1860,7 +1917,7 @@ const dreamMessages = {
   asiana:   '면접에서 수비니를 안 뽑으면 대체 누굴 뽑아 뽑뽀 💋❤️',
   premia:   '꿈은 이루어진다! ✈️🌟♥️🥺♥️',
   aerok:    '꿈을 향해 정진하자 수비나!! ♥️🥺♥️',
-  korail:   '기차도 하늘도 수쫑쿠와 함께라면 어디든! 🚄💙🥺💙',
+  korail:   '이 열차의 종착역은 수쫑쿠의 꿈입니다 🚄💙🥺💙',
 };
 
 const dreamColors = {
@@ -3181,6 +3238,82 @@ function filterWish(type, btn) {
   renderWishList(allWishes);
 }
 
+let allTodos = [];
+let todoFilter = 'todo';
+
+function filterTodo(type, btn) {
+  todoFilter = type;
+  document.querySelectorAll('#us-todo .ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTodoList(allTodos);
+}
+
+function renderTodoList(items) {
+  const el = document.getElementById('todo-list');
+  if (!el) return;
+  const whoLabel = { 호호:'호호', 수쫑쿠:'수쫑쿠', both:'우리 함께' };
+  const filtered = items.filter(i => todoFilter === 'done' ? i.done : !i.done);
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-checklist"></i>${todoFilter === 'done' ? '완료된 할일이 없어요' : '할일을 추가해보세요'}</div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(i => `<div class="wish-item${i.done?' done':''}" id="todo-${i.id}">
+    <div class="bcheck" onclick="toggleTodo('${i.id}',${i.done})" style="${i.done?'background:var(--accent);border-color:var(--accent);color:white;':''}">${i.done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
+    <div style="flex:1;">
+      <span class="btext">${i.text}</span>
+      <span class="who-badge ${i.who==='수쫑쿠'?'sujonku':i.who==='both'?'both':'hoho'}">${whoLabel[i.who]||i.who}</span>
+      <div class="sched-action-row">
+        <button class="sched-btn edit" onclick="editTodoItem('${i.id}')">✏️ 수정</button>
+        <button class="sched-btn del" onclick="deleteTodoItem('${i.id}')">🗑️ 삭제</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+async function saveTodo() {
+  const text = document.getElementById('todo-text').value.trim();
+  if (!text) { toast('내용을 입력해주세요'); return; }
+  const who = document.getElementById('todo-who').value;
+  const { collection, addDoc } = window._firebase;
+  await addDoc(collection(window._db, 'todos'), { text, who, done: false, date: new Date().toISOString() });
+  document.getElementById('todo-text').value = '';
+  closeModal('todo');
+  toast('할일이 추가됐어요 ✅');
+}
+
+async function toggleTodo(id, isDone) {
+  const { doc, updateDoc } = window._firebase;
+  await updateDoc(doc(window._db, 'todos', id), { done: !isDone });
+}
+
+function editTodoItem(id) {
+  const item = allTodos.find(t => t.id === id);
+  if (!item) return;
+  _actionTarget = { col: 'todos', id };
+  _actionData = item;
+  document.getElementById('edit-todo-text').value = item.text || '';
+  document.getElementById('edit-todo-who').value = item.who || '호호';
+  openModal('edit-todo');
+}
+
+async function deleteTodoItem(id) {
+  if (!confirm('이 할일을 삭제할까요?')) return;
+  const { doc, deleteDoc } = window._firebase;
+  await deleteDoc(doc(window._db, 'todos', id));
+  toast('삭제됐어요 🗑️');
+}
+
+async function updateTodo() {
+  if (!_actionTarget) return;
+  const { doc, updateDoc } = window._firebase;
+  await updateDoc(doc(window._db, 'todos', _actionTarget.id), {
+    text: document.getElementById('edit-todo-text').value.trim(),
+    who: document.getElementById('edit-todo-who').value
+  });
+  closeModal('edit-todo');
+  toast('수정됐어요 ✏️');
+}
+
 function renderBucketList(items) {
   const el = document.getElementById('bucket-list');
   const filtered = items.filter(i => bucketFilter === 'done' ? i.done : !i.done);
@@ -3486,6 +3619,33 @@ function openTodayWordModal(who) {
   document.getElementById('today-word-modal-title').textContent = '💭 ' + who + '의 한마디';
   document.getElementById('today-word-input').value = '';
   openModal('today-word');
+}
+
+function fmtWordDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  if (isNaN(d)) return dateStr;
+  const days = ['일','월','화','수','목','금','토'];
+  return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0') + ' (' + days[d.getDay()] + ')';
+}
+
+function renderWordHistory(items) {
+  const el = document.getElementById('word-history-list');
+  if (!el) return;
+  if (!items.length) { el.innerHTML = '<div class="empty"><i class="ti ti-message-heart"></i>아직 한마디가 없어요</div>'; return; }
+  const byDate = {};
+  items.forEach(i => { (byDate[i.date] = byDate[i.date] || []).push(i); });
+  const dates = Object.keys(byDate).sort().reverse();
+  el.innerHTML = dates.map(date => `<div class="card" style="margin-bottom:10px;">
+    <div class="meta-row"><span class="meta-date">${fmtWordDate(date)}</span></div>
+    ${byDate[date].map(i => `<div id="word-hist-${i.id}" style="display:flex;align-items:flex-start;gap:8px;margin-top:8px;-webkit-user-select:none;user-select:none;cursor:pointer;">
+      <span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}" style="flex-shrink:0;">${i.who||'호호'}</span>
+      <div class="card-text" style="flex:1;margin:0;">${i.text}</div>
+    </div>`).join('')}
+  </div>`).join('');
+  items.forEach(i => {
+    const row = document.getElementById('word-hist-'+i.id);
+    if (row) addLongPress(row, () => showAction('todayword', i.id, (i.text||'').slice(0,15), i));
+  });
 }
 
 async function saveTodayWordInline() {
@@ -4022,6 +4182,12 @@ window.addEventListener('firebase-ready', () => {
     });
   });
 
+  // Todos
+  onSnapshot(query(collection(db,'todos'), orderBy('date','asc')), snap => {
+    allTodos = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderTodoList(allTodos);
+  });
+
   // Bucket
   onSnapshot(query(collection(db,'bucket'), orderBy('date','asc')), snap => {
     const el = document.getElementById('bucket-list');
@@ -4242,6 +4408,18 @@ window.addEventListener('firebase-ready', () => {
       sujonkuEl.textContent = sujonkuWord ? sujonkuWord.text : '오늘의 한마디를 작성해주세요!';
       if (sujonkuWord) addLongPress(sujonkuEl, () => showAction('todayword', sujonkuWord.id, sujonkuWord.text.slice(0,15), sujonkuWord));
     }
+    // 기록 탭 오늘의 한마디 (홈과 연동)
+    const oppaEl2 = document.getElementById('record-word-oppa');
+    const sujonkuEl2 = document.getElementById('record-word-sujonku');
+    if (oppaEl2) {
+      oppaEl2.textContent = oppaWord ? oppaWord.text : '오늘의 한마디를 작성해주세요!';
+      if (oppaWord) addLongPress(oppaEl2, () => showAction('todayword', oppaWord.id, oppaWord.text.slice(0,15), oppaWord));
+    }
+    if (sujonkuEl2) {
+      sujonkuEl2.textContent = sujonkuWord ? sujonkuWord.text : '오늘의 한마디를 작성해주세요!';
+      if (sujonkuWord) addLongPress(sujonkuEl2, () => showAction('todayword', sujonkuWord.id, sujonkuWord.text.slice(0,15), sujonkuWord));
+    }
+    renderWordHistory(items);
   });
 
   // Travel Plans (unified)
