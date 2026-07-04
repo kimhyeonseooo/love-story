@@ -71,7 +71,7 @@
     .bnav.active i, .bnav.active span { color: var(--accent); }
 
     /* ── Content ── */
-    .content { flex: 1; padding-bottom: calc(72px + var(--safe-bottom)); }
+    .content { flex: 1; padding-bottom: var(--safe-bottom); }
     .section { display: none; padding: 10px 14px 70px; }
     .section.active { display: block; min-height: 0; }
     /* 호호 섹션: 다른 탭과 동일하게 위 정렬 (중앙정렬 제거) */
@@ -434,7 +434,7 @@
   <div class="content" id="content">
 
     <!-- 🏠 홈 -->
-    <div class="section active" id="section-home" style="padding:0 14px 10px;">
+    <div class="section active" id="section-home" style="padding:0 14px 70px;">
       <div class="home-header">
         <div class="home-title">수쫑쿠와 호호 😘❤️</div>
         
