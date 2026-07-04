@@ -720,11 +720,15 @@
 
       <!-- 할일 -->
       <div id="us-todo" style="display:none;">
-        <div class="sec-title"><i class="ti ti-checklist"></i> 할일 ✅</div>
-        <div class="pill-tabs" style="margin-bottom:12px;">
-          <button class="ptab active" id="todo-tab-todo" onclick="filterTodo('todo',this)">🌟 진행중</button>
-          <button class="ptab" id="todo-tab-done" onclick="filterTodo('done',this)">✅ 완료</button>
+        <div class="calendar-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeTodoMonth(-1)">&#8249;</button>
+            <div class="cal-title" id="todo-cal-title"></div>
+            <button class="cal-nav" onclick="changeTodoMonth(1)">&#8250;</button>
+          </div>
+          <div class="cal-grid" id="todo-cal-grid"></div>
         </div>
+        <div id="todo-selected-date" style="font-size:13px;font-weight:600;color:var(--brown1);margin-bottom:8px;display:none;"></div>
         <div id="todo-list"></div>
         <button class="add-btn" onclick="openModal('todo')"><i class="ti ti-plus"></i> 할일 추가하기</button>
       </div>
@@ -1217,6 +1221,7 @@
 <div class="modal-backdrop" id="modal-todo">
   <div class="modal"><h3>✅ 할일 추가</h3>
     <input type="text" id="todo-text" placeholder="해야 할 일" />
+    <input type="date" id="todo-date-input" />
     <select id="todo-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
       <option value="호호">호호</option><option value="수쫑쿠">수쫑쿠</option><option value="both">우리 함께</option>
     </select>
@@ -1228,6 +1233,7 @@
   <div class="modal">
     <div class="modal-title">할일 수정 ✏️</div>
     <input type="text" id="edit-todo-text" placeholder="내용" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;" />
+    <input type="date" id="edit-todo-date" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;" />
     <select id="edit-todo-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
       <option value="호호">호호</option>
       <option value="수쫑쿠">수쫑쿠</option>
@@ -1472,6 +1478,11 @@ function switchUs(type, btn) {
     const today = new Date();
     const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
     selectScheduleDate(todayStr);
+  }
+  if (type === 'todo') {
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    selectTodoDate(selectedTodoDate || todayStr);
   }
 }
 
@@ -3239,25 +3250,74 @@ function filterWish(type, btn) {
 }
 
 let allTodos = [];
-let todoFilter = 'todo';
+let todoDates = {};
+let todoYear = _todayKST.getFullYear();
+let todoMonth = _todayKST.getMonth();
+let selectedTodoDate = null;
 
-function filterTodo(type, btn) {
-  todoFilter = type;
-  document.querySelectorAll('#us-todo .ptab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTodoList(allTodos);
+function renderTodoCalendar() {
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('todo-cal-title').textContent = todoYear + '년 ' + monthNames[todoMonth];
+  const grid = document.getElementById('todo-cal-grid');
+  const today = new Date();
+  const firstDay = new Date(todoYear, todoMonth, 1).getDay();
+  const daysInMonth = new Date(todoYear, todoMonth+1, 0).getDate();
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  let h = dayLabels.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) h += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = todoYear + '-' + String(todoMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const isToday = today.getFullYear()===todoYear && today.getMonth()===todoMonth && today.getDate()===d;
+    const isSelected = selectedTodoDate === dateStr;
+    const dayOfWeek = new Date(todoYear, todoMonth, d).getDay();
+    const hasTodo = todoDates[dateStr];
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    else if (isSelected) cls += ' selected-day';
+    if (dayOfWeek===0) cls += ' sunday';
+    if (dayOfWeek===6) cls += ' saturday';
+    if (hasTodo) cls += ' has-diary';
+    h += `<div class="${cls}" onclick="selectTodoDate('${dateStr}')">${d}</div>`;
+  }
+  grid.innerHTML = h;
+}
+
+function changeTodoMonth(dir) {
+  todoMonth += dir;
+  if (todoMonth > 11) { todoMonth = 0; todoYear++; }
+  if (todoMonth < 0) { todoMonth = 11; todoYear--; }
+  renderTodoCalendar();
+}
+
+function selectTodoDate(dateStr) {
+  selectedTodoDate = dateStr;
+  renderTodoCalendar();
+  const filtered = allTodos.filter(t => (t.date||'').slice(0,10) === dateStr);
+  updateTodoDateLabel(dateStr, filtered);
+  renderTodoList(filtered);
+  const inp = document.getElementById('todo-date-input');
+  if (inp) inp.value = dateStr;
+}
+
+function updateTodoDateLabel(dateStr, filtered) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const label = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+  const done = filtered.filter(t => t.done).length;
+  const dateEl = document.getElementById('todo-selected-date');
+  dateEl.textContent = '✅ ' + label + ' 할일' + (filtered.length ? ` (${done}/${filtered.length} 완료)` : '');
+  dateEl.style.display = 'block';
 }
 
 function renderTodoList(items) {
   const el = document.getElementById('todo-list');
   if (!el) return;
   const whoLabel = { 호호:'호호', 수쫑쿠:'수쫑쿠', both:'우리 함께' };
-  const filtered = items.filter(i => todoFilter === 'done' ? i.done : !i.done);
-  if (!filtered.length) {
-    el.innerHTML = `<div class="empty"><i class="ti ti-checklist"></i>${todoFilter === 'done' ? '완료된 할일이 없어요' : '할일을 추가해보세요'}</div>`;
+  if (!items.length) {
+    el.innerHTML = `<div class="empty" style="padding:16px;"><i class="ti ti-checklist"></i>이 날의 할일이 없어요</div>`;
     return;
   }
-  el.innerHTML = filtered.map(i => `<div class="wish-item${i.done?' done':''}" id="todo-${i.id}">
+  const sorted = [...items].sort((a,b) => (a.done===b.done) ? 0 : (a.done ? 1 : -1));
+  el.innerHTML = sorted.map(i => `<div class="wish-item${i.done?' done':''}" id="todo-${i.id}">
     <div class="bcheck" onclick="toggleTodo('${i.id}',${i.done})" style="${i.done?'background:var(--accent);border-color:var(--accent);color:white;':''}">${i.done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
     <div style="flex:1;">
       <span class="btext">${i.text}</span>
@@ -3274,8 +3334,10 @@ async function saveTodo() {
   const text = document.getElementById('todo-text').value.trim();
   if (!text) { toast('내용을 입력해주세요'); return; }
   const who = document.getElementById('todo-who').value;
+  let date = document.getElementById('todo-date-input').value;
+  if (!date) date = selectedTodoDate || new Date().toISOString().slice(0,10);
   const { collection, addDoc } = window._firebase;
-  await addDoc(collection(window._db, 'todos'), { text, who, done: false, date: new Date().toISOString() });
+  await addDoc(collection(window._db, 'todos'), { text, who, done: false, date, createdAt: new Date().toISOString() });
   document.getElementById('todo-text').value = '';
   closeModal('todo');
   toast('할일이 추가됐어요 ✅');
@@ -3292,6 +3354,7 @@ function editTodoItem(id) {
   _actionTarget = { col: 'todos', id };
   _actionData = item;
   document.getElementById('edit-todo-text').value = item.text || '';
+  document.getElementById('edit-todo-date').value = (item.date||'').slice(0,10);
   document.getElementById('edit-todo-who').value = item.who || '호호';
   openModal('edit-todo');
 }
@@ -3308,6 +3371,7 @@ async function updateTodo() {
   const { doc, updateDoc } = window._firebase;
   await updateDoc(doc(window._db, 'todos', _actionTarget.id), {
     text: document.getElementById('edit-todo-text').value.trim(),
+    date: document.getElementById('edit-todo-date').value,
     who: document.getElementById('edit-todo-who').value
   });
   closeModal('edit-todo');
@@ -4185,7 +4249,16 @@ window.addEventListener('firebase-ready', () => {
   // Todos
   onSnapshot(query(collection(db,'todos'), orderBy('date','asc')), snap => {
     allTodos = snap.docs.map(d => ({id:d.id,...d.data()}));
-    renderTodoList(allTodos);
+    todoDates = {};
+    allTodos.forEach(t => { const ds = (t.date||'').slice(0,10); if (ds) todoDates[ds] = true; });
+    if (!selectedTodoDate) {
+      const t = new Date();
+      selectedTodoDate = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+    }
+    renderTodoCalendar();
+    const filtered = allTodos.filter(t => (t.date||'').slice(0,10) === selectedTodoDate);
+    updateTodoDateLabel(selectedTodoDate, filtered);
+    renderTodoList(filtered);
   });
 
   // Bucket
