@@ -764,6 +764,12 @@
           </div>
           <div class="cal-grid" id="todo-cal-grid"></div>
         </div>
+        <div class="pill-tabs" style="margin-bottom:10px;" id="todo-who-tabs">
+          <button class="ptab active" onclick="filterTodoWho('all',this)">전체</button>
+          <button class="ptab" onclick="filterTodoWho('호호',this)">호호</button>
+          <button class="ptab" onclick="filterTodoWho('수쫑쿠',this)">수쫑쿠</button>
+          <button class="ptab" onclick="filterTodoWho('both',this)">우리 함께</button>
+        </div>
         <div id="todo-selected-date" style="font-size:13px;font-weight:600;color:var(--brown1);margin-bottom:8px;display:none;"></div>
         <div id="todo-list"></div>
         <button class="add-btn" onclick="openModal('todo')"><i class="ti ti-plus"></i> 할일 추가하기</button>
@@ -3469,6 +3475,7 @@ function filterWish(type, btn) {
 }
 
 let allTodos = [];
+let todoWhoFilter = 'all';
 let todoDates = {};
 let todoYear = _todayKST.getFullYear();
 let todoMonth = _todayKST.getMonth();
@@ -3527,10 +3534,19 @@ function updateTodoDateLabel(dateStr, filtered) {
   dateEl.style.display = 'block';
 }
 
+function filterTodoWho(who, btn) {
+  todoWhoFilter = who;
+  document.querySelectorAll('#todo-who-tabs .ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = allTodos.filter(t => (t.date||'').slice(0,10) === selectedTodoDate);
+  renderTodoList(filtered);
+}
+
 function renderTodoList(items) {
   const el = document.getElementById('todo-list');
   if (!el) return;
   const whoLabel = { 호호:'호호', 수쫑쿠:'수쫑쿠', both:'우리 함께' };
+  if (todoWhoFilter !== 'all') items = items.filter(i => i.who === todoWhoFilter);
   if (!items.length) {
     el.innerHTML = `<div class="empty" style="padding:16px;"><i class="ti ti-checklist"></i>이 날의 할일이 없어요</div>`;
     return;
