@@ -125,6 +125,8 @@
 
     /* ── Pill tabs ── */
     .pill-tabs { display: flex; gap: 5px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    #hoho-tabs .ptab:first-child { margin-left: auto; }
+    #hoho-tabs .ptab:last-child { margin-right: auto; }
     .pill-tabs::-webkit-scrollbar { display: none; }
     .ptab { background: var(--cream4); border: 0.5px solid var(--cream5); border-radius: 20px; padding: 5px 11px; font-size: 11px; color: var(--brown2); cursor: pointer; white-space: nowrap; font-family: inherit; flex-shrink: 0; }
     .ptab.active { background: var(--accent); color: white; border-color: var(--accent); }
@@ -834,7 +836,7 @@
 
   <!-- 🎲 호호 -->
     <div class="section" id="section-hoho" style="display:none;">
-      <div class="pill-tabs" id="hoho-tabs" style="justify-content:center;">
+      <div class="pill-tabs" id="hoho-tabs">
         <button class="ptab active" onclick="switchHoho('dream',this)">✈️ 드림</button>
         <button class="ptab" onclick="switchHoho('question',this)">💬 질문</button>
         <button class="ptab" onclick="switchHoho('balance',this)">⚖️ 밸런스</button>
@@ -1435,6 +1437,26 @@
 
 <script>
 const TABS = ['home','us','gallery','map','record','hoho'];
+
+// PC에서 탭 줄 가로 스크롤: 마우스 휠 + 드래그
+document.querySelectorAll('.pill-tabs').forEach(el => {
+  el.addEventListener('wheel', e => {
+    if (el.scrollWidth > el.clientWidth) {
+      e.preventDefault();
+      el.scrollLeft += (e.deltaY || e.deltaX);
+    }
+  }, { passive: false });
+  let isDown = false, startX = 0, startLeft = 0, moved = false;
+  el.addEventListener('mousedown', e => { isDown = true; moved = false; startX = e.pageX; startLeft = el.scrollLeft; });
+  window.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    const dx = e.pageX - startX;
+    if (Math.abs(dx) > 5) moved = true;
+    el.scrollLeft = startLeft - dx;
+  });
+  window.addEventListener('mouseup', () => { isDown = false; });
+  el.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+});
 
 function showTab(tab) {
   TABS.forEach(t => {
