@@ -1547,6 +1547,11 @@ function switchRecord(type, btn) {
   document.querySelectorAll('#section-record .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('content').scrollTop = 0;
+  if (type === 'meal' && !selectedMealDate) {
+    const t = new Date();
+    const todayStr = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+    selectMealDate(todayStr);
+  }
 }
 
 function switchUs(type, btn) {
