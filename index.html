@@ -74,7 +74,9 @@
     .content { flex: 1; padding-bottom: var(--safe-bottom); }
     .section { display: none; padding: 10px 14px 70px; }
     .section.active { display: block; min-height: 0; }
-    /* 호호 섹션: 모든 서브탭 위 정렬 (여백 없음) */
+    /* 호호 섹션: 콘텐츠가 화면에 다 들어올 때만 JS가 세로 중앙정렬 클래스를 붙임 */
+    #section-hoho.hoho-center { display: flex !important; flex-direction: column; justify-content: center; min-height: calc(100dvh - 130px); }
+    #section-hoho.hoho-center > * { flex-shrink: 0; }
     @media (min-width: 700px) and (min-height: 800px) {
       #dream-photo { max-height: 480px !important; }
     }
@@ -1446,13 +1448,14 @@ function showTab(tab) {
   });
   const active = document.getElementById('section-'+tab);
   active.classList.add('active');
-  active.style.display = '';
+  active.style.display = 'block';
   document.getElementById('tab-'+tab).classList.add('active');
   document.getElementById('content').scrollTop = 0;
   window.scrollTo(0, 0);
   if (tab === 'map') { setTimeout(initMap, 300); setTimeout(() => { if(kakaoMap) kakao.maps.event.trigger(kakaoMap,'resize'); }, 400); }
   if (tab === 'home') refreshHomePhotos();
   if (tab === 'hoho') updateHohoQuestion();
+  if (tab === 'hoho') requestAnimationFrame(adjustHohoLayout);
 }
 
 function refreshHomePhotos() {
@@ -1851,6 +1854,20 @@ async function saveQuestionAnswer() {
 }
 
 // ── Hoho tabs ──
+function adjustHohoLayout() {
+  const sec = document.getElementById('section-hoho');
+  if (!sec || !sec.classList.contains('active')) return;
+  sec.classList.remove('hoho-center');
+  const navH = document.querySelector('.bottom-nav') ? document.querySelector('.bottom-nav').offsetHeight : 60;
+  const avail = window.innerHeight - navH;
+  if (sec.scrollHeight <= avail) sec.classList.add('hoho-center');
+}
+window.addEventListener('resize', () => { adjustHohoLayout(); });
+if (window.ResizeObserver) {
+  const _hohoSec = document.getElementById('section-hoho');
+  if (_hohoSec) new ResizeObserver(() => adjustHohoLayout()).observe(_hohoSec);
+}
+
 function switchHoho(type, btn) {
   ['today','question','balance','mission','roulette','dream'].forEach(t => {
     const el = document.getElementById('hoho-'+t);
@@ -1859,6 +1876,7 @@ function switchHoho(type, btn) {
   document.getElementById('hoho-'+type).style.display = 'block';
   document.querySelectorAll('#hoho-tabs .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  requestAnimationFrame(adjustHohoLayout);
   if (type === 'question') updateHohoQuestion();
   if (type === 'dream') setDreamAirline('korean');
   if (type === 'balance') initBalance();
