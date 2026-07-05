@@ -514,6 +514,7 @@
         <button class="ptab" onclick="switchRecord('datelog',this)">💝 데이트로그</button>
         <button class="ptab" onclick="switchRecord('tmi',this)">💬 TMI</button>
         <button class="ptab" onclick="switchRecord('word',this)">💭 한마디</button>
+        <button class="ptab" onclick="switchRecord('meal',this)">🥗 식단</button>
         <button class="ptab" onclick="switchRecord('worry',this)">고민</button>
         <button class="ptab" onclick="switchRecord('sulk',this)">서운핑</button>
         <button class="ptab" onclick="switchRecord('letters',this)">편지함</button>
@@ -550,6 +551,37 @@
           <div class="write-footer">
             <select class="who-select" id="diary-who"><option>호호</option><option>수쫑쿠</option></select>
             <button class="submit-btn" onclick="saveDiary()">저장하기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 식단 -->
+      <div id="record-meal" style="display:none;">
+        <div class="calendar-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="changeMealMonth(-1)">&#8249;</button>
+            <div class="cal-title" id="meal-cal-title"></div>
+            <button class="cal-nav" onclick="changeMealMonth(1)">&#8250;</button>
+          </div>
+          <div class="cal-grid" id="meal-cal-grid"></div>
+        </div>
+        <div id="meal-selected-label" style="font-size:13px;font-weight:600;color:var(--brown1);margin-bottom:8px;display:none;"></div>
+        <div id="meal-list"></div>
+        <button class="add-btn" id="meal-add-btn" onclick="openMealWrite()" style="display:none;"><i class="ti ti-plus"></i> 식단 기록하기</button>
+        <div class="write-area" id="meal-write-area" style="display:none;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span style="font-size:11px;color:var(--brown3);">끼니</span>
+            <select class="who-select" id="meal-type" style="flex:1;">
+              <option>🌅 아침</option>
+              <option>☀️ 점심</option>
+              <option>🌙 저녁</option>
+              <option>🍪 간식</option>
+            </select>
+          </div>
+          <textarea id="meal-input" rows="3" placeholder="예) 계란 2개, 치즈 1개, 닭가슴살 1개, 현미밥, 김치 조금"></textarea>
+          <div class="write-footer">
+            <select class="who-select" id="meal-who"><option>호호</option><option>수쫑쿠</option></select>
+            <button class="submit-btn" onclick="saveMeal()">저장하기</button>
           </div>
         </div>
       </div>
@@ -1224,6 +1256,27 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="modal-edit-meal">
+  <div class="modal">
+    <div class="modal-title">식단 수정 ✏️</div>
+    <select id="edit-meal-type" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
+      <option>🌅 아침</option>
+      <option>☀️ 점심</option>
+      <option>🌙 저녁</option>
+      <option>🍪 간식</option>
+    </select>
+    <textarea id="edit-meal-text" rows="3" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;resize:vertical;"></textarea>
+    <select id="edit-meal-who" style="width:100%;background:var(--cream4);border:0.5px solid var(--cream5);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--brown1);font-family:inherit;outline:none;margin-bottom:10px;">
+      <option>호호</option>
+      <option>수쫑쿠</option>
+    </select>
+    <div style="display:flex;gap:8px;">
+      <button class="modal-cancel" onclick="closeModal('edit-meal')">취소</button>
+      <button class="modal-save" onclick="updateMeal()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-todo">
   <div class="modal"><h3>✅ 할일 추가</h3>
     <input type="text" id="todo-text" placeholder="해야 할 일" />
@@ -1488,7 +1541,7 @@ function refreshHomePhotos() {
 }
 
 function switchRecord(type, btn) {
-  ['diary','datelog','tmi','word','worry','sulk','letters','capsule','about'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
+  ['diary','datelog','tmi','word','meal','worry','sulk','letters','capsule','about'].forEach(t => document.getElementById('record-'+t).style.display = 'none');
   if (type === 'about') loadAllAbout();
   document.getElementById('record-'+type).style.display = 'block';
   document.querySelectorAll('#section-record .ptab').forEach(b => b.classList.remove('active'));
@@ -2694,6 +2747,137 @@ function selectDiaryDate(dateStr) {
   if (writeArea) writeArea.style.display = 'none';
   const filtered = allDiaries.filter(i => i.date && i.date.slice(0,10) === dateStr);
   renderDiaryList(filtered);
+}
+
+// ── 식단 ──
+let allMeals = [];
+let mealDates = new Set();
+let mealYear = _todayKST.getFullYear();
+let mealMonth = _todayKST.getMonth();
+let selectedMealDate = null;
+const MEAL_ORDER = { '🌅 아침': 1, '☀️ 점심': 2, '🌙 저녁': 3, '🍪 간식': 4 };
+const MEAL_COLORS = { '🌅 아침': 'background:#fff1e0;color:#b36b00;', '☀️ 점심': 'background:#fff8d6;color:#8f7500;', '🌙 저녁': 'background:#e4eaff;color:#4a5fb8;', '🍪 간식': 'background:#ffe4ef;color:#c05080;' };
+
+function renderMealCalendar() {
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const titleEl = document.getElementById('meal-cal-title');
+  if (!titleEl) return;
+  titleEl.textContent = mealYear + '년 ' + monthNames[mealMonth];
+  const grid = document.getElementById('meal-cal-grid');
+  const today = new Date();
+  const firstDay = new Date(mealYear, mealMonth, 1).getDay();
+  const daysInMonth = new Date(mealYear, mealMonth+1, 0).getDate();
+  const dayLabels = ['일','월','화','수','목','금','토'];
+  let h = dayLabels.map(d => `<div class="cal-day-label">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) h += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = mealYear + '-' + String(mealMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const isToday = today.getFullYear()===mealYear && today.getMonth()===mealMonth && today.getDate()===d;
+    const isSelected = selectedMealDate === dateStr;
+    const dayOfWeek = new Date(mealYear, mealMonth, d).getDay();
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    else if (isSelected) cls += ' selected-day';
+    if (dayOfWeek===0) cls += ' sunday';
+    if (dayOfWeek===6) cls += ' saturday';
+    if (mealDates.has(dateStr)) cls += ' has-diary';
+    h += `<div class="${cls}" onclick="selectMealDate('${dateStr}')">${d}</div>`;
+  }
+  grid.innerHTML = h;
+}
+
+function changeMealMonth(dir) {
+  mealMonth += dir;
+  if (mealMonth > 11) { mealMonth = 0; mealYear++; }
+  if (mealMonth < 0) { mealMonth = 11; mealYear--; }
+  renderMealCalendar();
+}
+
+function selectMealDate(dateStr) {
+  selectedMealDate = dateStr;
+  renderMealCalendar();
+  const d = new Date(dateStr + 'T12:00:00');
+  const label = d.getFullYear() + '년 ' + (d.getMonth()+1) + '월 ' + d.getDate() + '일';
+  const labelEl = document.getElementById('meal-selected-label');
+  if (labelEl) { labelEl.textContent = '🥗 ' + label + '의 식단'; labelEl.style.display = 'block'; }
+  const addBtn = document.getElementById('meal-add-btn');
+  if (addBtn) addBtn.style.display = 'flex';
+  const writeArea = document.getElementById('meal-write-area');
+  if (writeArea) writeArea.style.display = 'none';
+  renderMealList(allMeals.filter(i => i.date && i.date.slice(0,10) === dateStr));
+}
+
+function openMealWrite() {
+  const writeArea = document.getElementById('meal-write-area');
+  if (writeArea) writeArea.style.display = 'block';
+  const addBtn = document.getElementById('meal-add-btn');
+  if (addBtn) addBtn.style.display = 'none';
+  document.getElementById('meal-input').focus();
+}
+
+function renderMealList(items) {
+  const el = document.getElementById('meal-list');
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = selectedMealDate
+      ? '<div class="empty" style="padding:16px;"><i class="ti ti-salad"></i>이 날의 식단 기록이 없어요</div>'
+      : '<div class="empty"><i class="ti ti-salad"></i>달력에서 날짜를 선택해주세요</div>';
+    return;
+  }
+  const sorted = [...items].sort((a,b) => (MEAL_ORDER[a.meal]||9) - (MEAL_ORDER[b.meal]||9) || ((a.who||'') > (b.who||'') ? 1 : -1));
+  el.innerHTML = sorted.map(i => `<div class="card" id="meal-${i.id}">
+    <div class="meta-row">
+      <span style="font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600;${MEAL_COLORS[i.meal]||''}">${i.meal||'🥗 식단'}</span>
+      <span class="meta-who ${i.who==='수쫑쿠'?'sujonku':'hoho'}">${i.who||'호호'}</span>
+    </div>
+    <div class="card-text" style="white-space:pre-line;">${i.text}</div>
+    <div class="sched-action-row">
+      <button class="sched-btn edit" onclick="editMeal('${i.id}')">✏️ 수정</button>
+      <button class="sched-btn del" onclick="deleteMeal('${i.id}')">🗑️ 삭제</button>
+    </div>
+  </div>`).join('');
+}
+
+async function saveMeal() {
+  const text = document.getElementById('meal-input').value.trim();
+  if (!text) { toast('내용을 입력해주세요'); return; }
+  const meal = document.getElementById('meal-type').value;
+  const who = document.getElementById('meal-who').value;
+  const { collection, addDoc } = window._firebase;
+  const date = selectedMealDate ? selectedMealDate + 'T12:00:00.000Z' : new Date().toISOString();
+  await addDoc(collection(window._db, 'meals'), { text, meal, who, date });
+  document.getElementById('meal-input').value = '';
+  toast('식단이 기록됐어요 🥗');
+}
+
+function editMeal(id) {
+  const item = allMeals.find(m => m.id === id);
+  if (!item) return;
+  _actionTarget = { col: 'meals', id };
+  _actionData = item;
+  document.getElementById('edit-meal-type').value = item.meal || '🌅 아침';
+  document.getElementById('edit-meal-text').value = item.text || '';
+  document.getElementById('edit-meal-who').value = item.who || '호호';
+  openModal('edit-meal');
+}
+
+async function deleteMeal(id) {
+  if (!confirm('이 식단 기록을 삭제할까요?')) return;
+  const { doc, deleteDoc } = window._firebase;
+  await deleteDoc(doc(window._db, 'meals', id));
+  toast('삭제됐어요 🗑️');
+}
+
+async function updateMeal() {
+  if (!_actionTarget) return;
+  const { doc, updateDoc } = window._firebase;
+  await updateDoc(doc(window._db, 'meals', _actionTarget.id), {
+    meal: document.getElementById('edit-meal-type').value,
+    text: document.getElementById('edit-meal-text').value.trim(),
+    who: document.getElementById('edit-meal-who').value
+  });
+  closeModal('edit-meal');
+  toast('수정됐어요 ✏️');
 }
 
 function openDiaryWrite() {
@@ -4112,6 +4296,16 @@ window.addEventListener('firebase-ready', () => {
   const db = window._db;
 
   // Diary
+  // Meals
+  onSnapshot(query(collection(db,'meals'), orderBy('date','desc')), snap => {
+    allMeals = snap.docs.map(d => ({id:d.id,...d.data()}));
+    mealDates = new Set(allMeals.map(i => i.date ? i.date.slice(0,10) : '').filter(Boolean));
+    renderMealCalendar();
+    if (selectedMealDate) {
+      renderMealList(allMeals.filter(i => i.date && i.date.slice(0,10) === selectedMealDate));
+    }
+  });
+
   onSnapshot(query(collection(db,'diary'), orderBy('date','desc')), snap => {
     allDiaries = snap.docs.map(d => ({id:d.id,...d.data()}));
     _statsData.diary = allDiaries.length;
