@@ -3535,18 +3535,32 @@ function renderTodoList(items) {
     el.innerHTML = `<div class="empty" style="padding:16px;"><i class="ti ti-checklist"></i>이 날의 할일이 없어요</div>`;
     return;
   }
-  const sorted = [...items].sort((a,b) => (a.done===b.done) ? 0 : (a.done ? 1 : -1));
-  el.innerHTML = sorted.map(i => `<div class="wish-item${i.done?' done':''}" id="todo-${i.id}">
-    <div class="bcheck" onclick="toggleTodo('${i.id}',${i.done})" style="${i.done?'background:var(--accent);border-color:var(--accent);color:white;':''}">${i.done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
-    <div style="flex:1;">
-      <span class="btext">${i.text}</span>
-      <span class="who-badge ${i.who==='수쫑쿠'?'sujonku':i.who==='both'?'both':'hoho'}">${whoLabel[i.who]||i.who}</span>
-      <div class="sched-action-row">
-        <button class="sched-btn edit" onclick="editTodoItem('${i.id}')">✏️ 수정</button>
-        <button class="sched-btn del" onclick="deleteTodoItem('${i.id}')">🗑️ 삭제</button>
-      </div>
-    </div>
-  </div>`).join('');
+  const whoOrder = { '호호': 1, '수쫑쿠': 2, 'both': 3 };
+  const sorted = [...items].sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return (whoOrder[a.who]||9) - (whoOrder[b.who]||9);
+  });
+  let lastWho = '';
+  el.innerHTML = sorted.map((i, idx) => {
+    let header = '';
+    const iWho = whoLabel[i.who] || i.who;
+    if (todoWhoFilter === 'all' && iWho !== lastWho) {
+      const colors = { '호호': '#7aaad4', '수쫑쿠': '#e8849a', '우리 함께': '#a080c0' };
+      header = '<div style="font-size:12px;font-weight:700;color:' + (colors[iWho]||'var(--brown1)') + ';margin:' + (lastWho ? '14px' : '4px') + ' 0 6px;' + (lastWho ? 'border-top:1px solid var(--cream5);padding-top:12px;' : '') + '">' + iWho + '</div>';
+      lastWho = iWho;
+    }
+    return header + '<div class="wish-item' + (i.done ? ' done' : '') + '" id="todo-' + i.id + '">' +
+    '<div class="bcheck" onclick="toggleTodo(\'' + i.id + '\',' + i.done + ')" style="' + (i.done ? 'background:var(--accent);border-color:var(--accent);color:white;' : '') + '">' + (i.done ? '<i class="ti ti-check" style="font-size:12px"></i>' : '') + '</div>' +
+    '<div style="flex:1;">' +
+      '<span class="btext">' + i.text + '</span>' +
+      '<span class="who-badge ' + (i.who==='수쫑쿠'?'sujonku':i.who==='both'?'both':'hoho') + '">' + (whoLabel[i.who]||i.who) + '</span>' +
+      '<div class="sched-action-row">' +
+        '<button class="sched-btn edit" onclick="editTodoItem(\'' + i.id + '\')">✏️ 수정</button>' +
+        '<button class="sched-btn del" onclick="deleteTodoItem(\'' + i.id + '\')">🗑️ 삭제</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+  }).join('');
 }
 
 async function saveTodo() {
