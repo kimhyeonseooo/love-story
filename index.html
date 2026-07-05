@@ -74,9 +74,6 @@
     .content { flex: 1; overflow-y: auto; min-height: 0; }
     .section { display: none; padding: 10px 14px 70px; }
     .section.active { display: block; min-height: 0; }
-    /* 호호 섹션: 콘텐츠가 화면에 다 들어올 때만 JS가 세로 중앙정렬 클래스를 붙임 */
-    #section-hoho.hoho-center { display: flex !important; flex-direction: column; justify-content: center; min-height: 100%; }
-    #section-hoho.hoho-center > * { flex-shrink: 0; }
     @media (min-width: 700px) and (min-height: 800px) {
       #dream-photo { max-height: 480px !important; }
     }
@@ -1452,7 +1449,7 @@ function showTab(tab) {
   if (tab === 'map') { setTimeout(initMap, 300); setTimeout(() => { if(kakaoMap) kakao.maps.event.trigger(kakaoMap,'resize'); }, 400); }
   if (tab === 'home') refreshHomePhotos();
   if (tab === 'hoho') updateHohoQuestion();
-  if (tab === 'hoho') requestAnimationFrame(adjustHohoLayout);
+
 }
 
 function refreshHomePhotos() {
@@ -1853,19 +1850,6 @@ async function saveQuestionAnswer() {
 }
 
 // ── Hoho tabs ──
-function adjustHohoLayout() {
-  const sec = document.getElementById('section-hoho');
-  const cont = document.getElementById('content');
-  if (!sec || !cont || !sec.classList.contains('active')) return;
-  sec.classList.remove('hoho-center');
-  if (sec.scrollHeight <= cont.clientHeight) sec.classList.add('hoho-center');
-}
-window.addEventListener('resize', () => { adjustHohoLayout(); });
-if (window.ResizeObserver) {
-  const _hohoSec = document.getElementById('section-hoho');
-  if (_hohoSec) new ResizeObserver(() => adjustHohoLayout()).observe(_hohoSec);
-}
-
 function switchHoho(type, btn) {
   ['today','question','balance','mission','roulette','dream'].forEach(t => {
     const el = document.getElementById('hoho-'+t);
@@ -1875,7 +1859,6 @@ function switchHoho(type, btn) {
   document.querySelectorAll('#hoho-tabs .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('content').scrollTop = 0;
-  requestAnimationFrame(adjustHohoLayout);
   if (type === 'question') updateHohoQuestion();
   if (type === 'dream') setDreamAirline('korean');
   if (type === 'balance') initBalance();
