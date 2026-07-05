@@ -71,7 +71,7 @@
     .bnav.active i, .bnav.active span { color: var(--accent); }
 
     /* ── Content ── */
-    .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+    .content { flex: 1; overflow-y: auto; min-height: 0; }
     .section { display: none; padding: 10px 14px 70px; }
     .section.active { display: block; min-height: 0; }
     /* 호호 섹션: 콘텐츠가 화면에 다 들어올 때만 JS가 세로 중앙정렬 클래스를 붙임 */
@@ -1472,6 +1472,7 @@ function switchRecord(type, btn) {
   document.getElementById('record-'+type).style.display = 'block';
   document.querySelectorAll('#section-record .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
 }
 
 function switchUs(type, btn) {
@@ -1479,6 +1480,7 @@ function switchUs(type, btn) {
   document.getElementById('us-'+type).style.display = 'block';
   document.querySelectorAll('#section-us .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
   if (type === 'stats') updateStats();
   if (type === 'schedule') {
     const today = new Date();
@@ -1872,6 +1874,7 @@ function switchHoho(type, btn) {
   document.getElementById('hoho-'+type).style.display = 'block';
   document.querySelectorAll('#hoho-tabs .ptab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
   requestAnimationFrame(adjustHohoLayout);
   if (type === 'question') updateHohoQuestion();
   if (type === 'dream') setDreamAirline('korean');
