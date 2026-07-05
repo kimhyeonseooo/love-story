@@ -3568,7 +3568,7 @@ function renderTodoList(items) {
     return header + '<div class="wish-item' + (i.done ? ' done' : '') + '" id="todo-' + i.id + '">' +
     '<div class="bcheck" onclick="toggleTodo(\'' + i.id + '\',' + i.done + ')" style="' + (i.done ? 'background:var(--accent);border-color:var(--accent);color:white;' : '') + '">' + (i.done ? '<i class="ti ti-check" style="font-size:12px"></i>' : '') + '</div>' +
     '<div style="flex:1;">' +
-      '<span class="btext">' + i.text + '</span>' +
+      '<span class="btext">' + i.text + '</span> ' +
       '<span class="who-badge ' + (i.who==='수쫑쿠'?'sujonku':i.who==='both'?'both':'hoho') + '">' + (whoLabel[i.who]||i.who) + '</span>' +
       '<div class="sched-action-row">' +
         '<button class="sched-btn edit" onclick="editTodoItem(\'' + i.id + '\')">✏️ 수정</button>' +
